@@ -1,0 +1,10 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: aws-secrets
+spec:
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: "rds!db-879f01f1-086d-4128-af59-7aebda2714c8"
+        objectType: "secretsmanager"
