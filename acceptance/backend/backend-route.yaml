@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dissco-backend-service
+spec:
+  selector:
+    app: dissco-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dissco-backend-route
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`sandbox.dissco.tech`) && PathPrefix(`/api`)
+      kind: Rule
+      services:
+        - name: dissco-backend-service
+          namespace: default
+          port: 8080
