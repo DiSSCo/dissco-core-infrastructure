@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dissco-provenance-service
+  labels:
+    app: dissco-provenance-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dissco-provenance-service
+  template:
+    metadata:
+      labels:
+        app: dissco-provenance-service
+    spec:
+      containers:
+        - name: dissco-provenance-service
+          image: public.ecr.aws/dissco/dissco-core-provenance-service
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: spring.kafka.bootstrap-servers
+              value: kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+            - name: spring.kafka.consumer.key-deserializer
+              value: org.apache.kafka.common.serialization.StringDeserializer
+            - name: spring.kafka.consumer.value-deserializer
+              value: org.apache.kafka.common.serialization.StringDeserializer
+            - name: spring.kafka.consumer.group-id
+              value: group
+            - name: spring.kafka.consumer.topic
+              value: createUpdateDeleteTopic
+            - name: mongo.connection-string
+              value: mongodb://disscomasteruser:<insertYourPassword>@acc-document-db.cluster-cbppwfnjypll.eu-west-2.docdb.amazonaws.com:27017/?replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false
+            - name: mongo.database
+              value: dissco
+            - name: mongo.collection
+              value: provenance
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false

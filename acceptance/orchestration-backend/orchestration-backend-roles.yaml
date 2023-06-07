@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dissco-orchestration-backend-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: dissco-orchestration-backend-role
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [ "batch" ] # "" indicates the core API group
+    resources: [ "jobs" ]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dissco-orchestration-backend-role
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: dissco-orchestration-backend-sa
+    namespace: default
+roleRef:
+  kind: Role
+  name: dissco-orchestration-backend-role
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dissco-backend-deployment
+  namespace: default
+  labels:
+    app: dissco-backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dissco-backend
+  template:
+    metadata:
+      labels:
+        app: dissco-backend
+    spec:
+      serviceAccountName: secret-manager
+      containers:
+        - name: dissco-backend
+          image: public.ecr.aws/dissco/dissco-core-backend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          env:
+            - name: spring.datasource.url
+              value: jdbc:postgresql://terraform-20230523131639857400000001.cbppwfnjypll.eu-west-2.rds.amazonaws.com:5432/postgres
+            - name: spring.datasource.username
+              value: "disscomasteruser"
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: db-password
+            - name: elasticsearch.hostname
+              value: elastic-search-es-http.elastic.svc.cluster.local
+            - name: elasticsearch.port
+              value: "9200"
+            - name: springdoc.api-docs.path
+              value: /api/v3/api-docs
+            - name: springdoc.swagger-ui.path
+              value: /api/swagger-ui.html
+            - name: spring.security.oauth2.resourceserver.jwt.issuer-uri
+              value: https://login-demo.dissco.eu/auth/realms/dissco
+            - name: spring.security.oauth2.authorizationserver.endpoint.jwk-set-uri
+              value: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+            - name: jwt.auth.converter.resource-id
+              value: springboot-keycloak-client
+            - name: feign.annotations
+              value: dissco-core-annotation-processing-service.default.svc.cluster.local:8080
+            - name: mongo.connection-string
+              value: mongodb://disscomasteruser:<insertYourPassword>@acc-document-db.cluster-cbppwfnjypll.eu-west-2.docdb.amazonaws.com:27017/?replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false
+            - name: mongo.database
+              value: dissco
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: aws-secrets
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+      volumes:
+        - name: aws-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "aws-secrets"

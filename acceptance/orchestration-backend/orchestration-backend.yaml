@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dissco-orchestration-backend
+  labels:
+    app: dissco-orchestration-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dissco-orchestration-backend
+  template:
+    metadata:
+      labels:
+        app: dissco-orchestration-backend
+    spec:
+      serviceAccountName: dissco-orchestration-backend-sa
+      containers:
+        - name: dissco-orchestration-backend
+          image: public.ecr.aws/dissco/dissco-core-orchestration-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: spring.datasource.url
+              value: jdbc:postgresql://terraform-20230523131639857400000001.cbppwfnjypll.eu-west-2.rds.amazonaws.com:5432/postgres
+            - name: spring.datasource.username
+              value: "disscomasteruser"
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: db-password
+            - name: spring.security.oauth2.resourceserver.jwt.issuer-uri
+              value: https://login-demo.dissco.eu/auth/realms/dissco
+            - name: spring.security.oauth2.authorizationserver.endpoint.jwk-set-uri
+              value: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+            - name: jwt.auth.converter.resource-id
+              value: springboot-keycloak-client
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false

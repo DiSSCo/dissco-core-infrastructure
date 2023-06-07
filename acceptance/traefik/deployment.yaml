@@ -4,6 +4,70 @@ metadata:
   namespace: default
   name: traefik-ingress-controller
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: traefik-ingress-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - ingressclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+  - apiGroups:
+      - traefik.io
+      - traefik.containo.us
+    resources:
+      - middlewares
+      - middlewaretcps
+      - ingressroutes
+      - traefikservices
+      - ingressroutetcps
+      - ingressrouteudps
+      - tlsoptions
+      - tlsstores
+      - serverstransports
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: traefik-ingress-controller
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: traefik-ingress-controller
+    namespace: default
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -41,11 +105,6 @@ spec:
             - --certificatesresolvers.defaultresolver.acme.storage=acme.json
             - --metrics.prometheus=true
             - --providers.kubernetescrd.allowcrossnamespace=true
-            - --entryPoints.websecure.forwardedHeaders.insecure=true
-            - --entryPoints.websecure.forwardedHeaders.trustedIPs=192.168.32.0/19
-            - --entryPoints.websecure.proxyProtocol.trustedIPs=192.168.32.0/19
-            - --entryPoints.web.proxyProtocol.trustedIPs=192.168.32.0/19
-            - --entryPoints.web.forwardedHeaders.trustedIPs=192.168.32.0/19
             - --entryPoints.web.forwardedHeaders.insecure=true
 #            - --log.level=DEBUG
           ports:
