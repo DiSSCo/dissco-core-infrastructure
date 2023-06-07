@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: acceptance-deployment
+  namespace: argocd
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: acceptance
+    repoURL: https://github.com/DiSSCo/dissco-core-infrastructure.git
+    targetRevision: HEAD
+    directory:
+      recurse: true
