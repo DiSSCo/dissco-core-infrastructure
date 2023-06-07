@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: disscover
+  labels:
+    app: disscover
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: disscover
+  template:
+    metadata:
+      labels:
+        app: disscover
+    spec:
+      containers:
+        - name: disscover
+          image: public.ecr.aws/dissco/disscover:latest
+          ports:
+            - containerPort: 3000
+      restartPolicy: Always
