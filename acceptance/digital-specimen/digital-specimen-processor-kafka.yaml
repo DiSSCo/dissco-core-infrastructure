@@ -24,20 +24,35 @@ spec:
             - name: spring.profiles.active
               value: kafka
             - name: spring.datasource.url
-              value: jdbc:postgresql://terraform-20230523131639857400000001.cbppwfnjypll.eu-west-2.rds.amazonaws.com:5432/postgres
+              value: jdbc:postgresql://terraform-20230523131639857400000001.cbppwfnjypll.eu-west-2.rds.amazonaws.com:5432/dissco
             - name: spring.datasource.username
-              value: "disscomasteruser"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: db-username
             - name: spring.datasource.password
               valueFrom:
                 secretKeyRef:
-                  name: aws-secrets
+                  name: db-secrets
                   key: db-password
             - name: elasticsearch.hostname
               value: elastic-search-es-http.elastic.svc.cluster.local
             - name: elasticsearch.port
               value: "9200"
-            - name: elasticsearch.indexName
+            - name: elasticsearch.username
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: elastic-username
+            - name: elasticsearch.password
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: elastic-password
+            - name: elasticsearch.index-name
               value: digital-specimen
+            - name: management.health.elasticsearch.enabled
+              value: "false"
             - name: kafka.publisher.host
               value: kafka-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
             - name: kafka.consumer.host
@@ -46,6 +61,12 @@ spec:
               value: group
             - name: kafka.consumer.topic
               value: digital-specimen
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "200m"
+            limits:
+              memory: "500Mi"
           securityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
@@ -57,7 +78,7 @@ metadata:
 spec:
   scaleTargetRef:
     name: dissco-digital-specimen-processor-kafka
-  minReplicaCount: 1
+  minReplicaCount: 0
   maxReplicaCount:  5
   triggers:
     - type: kafka

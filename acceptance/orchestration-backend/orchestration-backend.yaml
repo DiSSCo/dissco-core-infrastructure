@@ -23,13 +23,16 @@ spec:
             - containerPort: 8080
           env:
             - name: spring.datasource.url
-              value: jdbc:postgresql://terraform-20230523131639857400000001.cbppwfnjypll.eu-west-2.rds.amazonaws.com:5432/postgres
+              value: jdbc:postgresql://terraform-20230523131639857400000001.cbppwfnjypll.eu-west-2.rds.amazonaws.com:5432/dissco
             - name: spring.datasource.username
-              value: "disscomasteruser"
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: db-username
             - name: spring.datasource.password
               valueFrom:
                 secretKeyRef:
-                  name: aws-secrets
+                  name: db-secrets
                   key: db-password
             - name: spring.security.oauth2.resourceserver.jwt.issuer-uri
               value: https://login-demo.dissco.eu/auth/realms/dissco
@@ -37,6 +40,12 @@ spec:
               value: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
             - name: jwt.auth.converter.resource-id
               value: springboot-keycloak-client
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "200m"
+            limits:
+              memory: "500Mi"
           securityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false

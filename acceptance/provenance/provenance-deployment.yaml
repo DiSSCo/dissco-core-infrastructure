@@ -32,11 +32,20 @@ spec:
             - name: spring.kafka.consumer.topic
               value: createUpdateDeleteTopic
             - name: mongo.connection-string
-              value: mongodb://disscomasteruser:<insertYourPassword>@acc-document-db.cluster-cbppwfnjypll.eu-west-2.docdb.amazonaws.com:27017/?replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: mongodb-connection
             - name: mongo.database
               value: dissco
             - name: mongo.collection
               value: provenance
+          resources:
+            requests:
+              memory: "500Mi"
+              cpu: "200m"
+            limits:
+              memory: "500Mi"
           securityContext:
             runAsNonRoot: true
             allowPrivilegeEscalation: false

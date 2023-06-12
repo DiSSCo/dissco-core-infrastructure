@@ -1,22 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orchestration-frontend
+  name: dissco-orchestration-frontend
   labels:
-    app: orchestration-frontend
+    app: dissco-orchestration-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: orchestration-frontend
+      app: dissco-orchestration-frontend
   template:
     metadata:
       labels:
-        app: orchestration-frontend
+        app: dissco-orchestration-frontend
     spec:
       containers:
-        - name: orchestration-frontend
+        - name: dissco-orchestration-frontend
           image: public.ecr.aws/dissco/orchestration-frontend:latest
           ports:
             - containerPort: 3000
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "100m"
+            limits:
+              memory: "100Mi"
       restartPolicy: Always

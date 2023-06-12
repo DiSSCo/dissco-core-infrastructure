@@ -19,4 +19,10 @@ spec:
           image: public.ecr.aws/dissco/disscover:latest
           ports:
             - containerPort: 3000
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "100m"
+            limits:
+              memory: "100Mi"
       restartPolicy: Always

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: orchestration-frontend
+  name: dissco-orchestration-frontend-service
 spec:
   selector:
-    app: orchestration-frontend
+    app: dissco-orchestration-frontend
   ports:
     - protocol: TCP
       port: 3000
@@ -12,7 +12,7 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: orchestration-frontend-route
+  name: dissco-orchestration-frontend-route
   namespace: default
 spec:
   entryPoints:
@@ -21,6 +21,6 @@ spec:
     - match: Host(`acc-orchestration.dissco.tech`)
       kind: Rule
       services:
-        - name: orchestration-frontend
+        - name: dissco-orchestration-frontend-service
           namespace: default
           port: 3000
