@@ -20,7 +20,7 @@ module "eks_blueprints_kubernetes_addons" {
 
   argocd_applications = {
     app-of-apps = {
-      repo_url           = "https://github.com/DiSSCo/dissco-core-infrastructure"
+      repo_url           = "https://github.com/DiSSCo/dissco-core-deployment"
       target_revision    = "HEAD"
       path               = "acceptance-argocd"
       add_on_application = true
