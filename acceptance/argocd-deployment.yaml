@@ -16,3 +16,8 @@ spec:
       recurse: true
   syncPolicy:
     automated: { }
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
