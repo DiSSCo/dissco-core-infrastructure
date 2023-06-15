@@ -3,12 +3,12 @@ Contains files for deploying and managing the core infrastructure.
 We use [terraform](https://www.terraform.io/) for the deployment of our infrastructure.
 These files describe how the infrastructure needs to be deployed on AWS, our cloud provider.
 
-For each environment there is a folder with the Terraform files.
+For each environment, there is a folder with the Terraform files.
 In the terraform-state-storage are the files with which the initial state storage resources were created.
 
 ## Deployment
 Terraform should be run locally.
-To synchronise follow these steps:
+To synchronise, follow these steps:
 - Pull the latest version from the repository
 - Move to the correct environment folder (example `cd acceptance`)
 - Run `terraform init` this will download all required files and version
