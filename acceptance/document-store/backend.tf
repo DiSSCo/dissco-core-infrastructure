@@ -1,9 +1,10 @@
 terraform {
   backend "s3" {
     bucket         = "dissco-terraform-state-backend"
-    dynamodb_table = "terraform_state"
-    key            = "terraform.tfstate"
+    key            = "acceptance/document-store/terraform.tfstate"
     region         = "eu-west-2"
+
+    dynamodb_table = "terraform_state"
     encrypt        = true
   }
 }
