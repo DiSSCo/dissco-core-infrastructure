@@ -14,9 +14,9 @@ data "terraform_remote_state" "vpc-state" {
   backend = "s3"
 
   config = {
-    bucket         = "dissco-terraform-state-backend"
-    key            = "acceptance/vpc/terraform.tfstate"
-    region         = "eu-west-2"
+    bucket = "dissco-terraform-state-backend"
+    key    = "acceptance/vpc/terraform.tfstate"
+    region = "eu-west-2"
   }
 }
 

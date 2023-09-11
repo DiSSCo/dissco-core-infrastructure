@@ -14,21 +14,21 @@ data "terraform_remote_state" "vpc-state" {
   backend = "s3"
 
   config = {
-    bucket         = "dissco-terraform-state-backend"
-    key            = "acceptance/vpc/terraform.tfstate"
-    region         = "eu-west-2"
+    bucket = "dissco-terraform-state-backend"
+    key    = "acceptance/vpc/terraform.tfstate"
+    region = "eu-west-2"
   }
 }
 
 resource "aws_docdb_cluster" "docdb" {
-  cluster_identifier      = "dissco-document-db-acc"
-  engine                  = "docdb"
-  master_username         = "disscomasteruser"
-  master_password         = ""
-  backup_retention_period = 7
-  db_subnet_group_name    = data.terraform_remote_state.vpc-state.outputs.database_subnet_group
-  vpc_security_group_ids  = [data.terraform_remote_state.vpc-state.outputs.database_security_group]
-  skip_final_snapshot     = true
+  cluster_identifier              = "dissco-document-db-acc"
+  engine                          = "docdb"
+  master_username                 = "disscomasteruser"
+  master_password                 = ""
+  backup_retention_period         = 7
+  db_subnet_group_name            = data.terraform_remote_state.vpc-state.outputs.database_subnet_group
+  vpc_security_group_ids          = [data.terraform_remote_state.vpc-state.outputs.database_security_group]
+  skip_final_snapshot             = true
   db_cluster_parameter_group_name = aws_docdb_cluster_parameter_group.service.name
 }
 
@@ -41,7 +41,7 @@ resource "aws_docdb_cluster_instance" "cluster_instances" {
 
 resource "aws_docdb_cluster_parameter_group" "service" {
   family = "docdb5.0"
-  name = "dissco-acc-no-tls-parameter-group"
+  name   = "dissco-acc-no-tls-parameter-group"
 
   parameter {
     name  = "tls"
