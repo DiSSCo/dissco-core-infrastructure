@@ -95,6 +95,20 @@ resource "aws_security_group" "dissco-database-sg" {
     cidr_blocks = ["145.136.247.125/32"]
   }
   ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    description = "Handle Server"
+    cidr_blocks = ["18.130.232.162/32"]
+  }
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    description = "PostgreSQL access for Naturalis Network"
+    cidr_blocks = ["145.136.247.125/32"]
+  }
+  ingress {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
