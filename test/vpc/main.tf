@@ -77,6 +77,13 @@ resource "aws_security_group" "dissco-database-sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
+    description = "PostgreSQL access for Tom Office"
+    cidr_blocks = ["163.158.243.104/32"]
+  }
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
     description = "PostgreSQL access for Naturalis eduroam"
     cidr_blocks = ["145.136.247.119/32"]
   }
