@@ -84,6 +84,13 @@ resource "aws_security_group" "dissco-database-sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
+    description = "PostgreSQL access for Sou Home"
+    cidr_blocks = ["94.213.247.69/32"]
+  }
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
     description = "PostgreSQL access for Tom Home"
     cidr_blocks = ["84.24.63.197/32"]
   }
