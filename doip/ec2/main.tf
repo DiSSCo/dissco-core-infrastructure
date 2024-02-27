@@ -20,7 +20,7 @@ data "terraform_remote_state" "vpc-state" {
   backend = "s3"
 
   config = {
-    bucket = "doip-terraform-state-backend"
+    bucket = "dissco-terraform-state-backend"
     key    = "doip/vpc/terraform.tfstate"
     region = "eu-west-2"
   }

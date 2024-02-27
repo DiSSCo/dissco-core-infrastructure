@@ -17,7 +17,7 @@ module "doip-vpc" {
   cidr                                   = "10.102.0.0/26"
   azs                                    = ["eu-west-2a"]
   private_subnets                        = ["10.102.0.0/28"]
-  public_subnets                         = ["10.102.0.15/28"]
+  public_subnets                         = ["10.102.0.16/28"]
   create_igw                             = true
 
   enable_dns_hostnames = true
