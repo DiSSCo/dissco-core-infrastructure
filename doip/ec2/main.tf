@@ -33,7 +33,7 @@ resource "aws_key_pair" "key_pair" {
 
 resource "aws_instance" "doip_deployment" {
   ami                         = "ami-0a244485e2e4ffd03"
-  instance_type               = "t3.small"
+  instance_type               = "t3.micro"
   associate_public_ip_address = true
   key_name = aws_key_pair.key_pair.key_name
 

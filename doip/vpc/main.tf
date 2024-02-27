@@ -14,10 +14,10 @@ provider "aws" {
 module "doip-vpc" {
   source = "terraform-aws-modules/vpc/aws"
   name                                   = "dopi-vpc"
-  cidr                                   = "10.200.0.0/16"
-  azs                                    = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
-  private_subnets                        = ["10.200.1.0/24", "10.200.2.0/24", "10.200.3.0/24"]
-  public_subnets                         = ["10.200.101.0/24", "10.200.102.0/24", "10.200.103.0/24"]
+  cidr                                   = "10.102.0.0/26"
+  azs                                    = ["eu-west-2a"]
+  private_subnets                        = ["10.102.0.0/28"]
+  public_subnets                         = ["10.102.0.15/28"]
   create_igw                             = true
 
   enable_dns_hostnames = true
