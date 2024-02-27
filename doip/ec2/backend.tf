@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "doip-terraform-state-backend"
+    bucket = "dissco-terraform-state-backend"
     key    = "doip/ec2/terraform.tfstate"
     region = "eu-west-2"
 
