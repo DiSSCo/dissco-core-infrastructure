@@ -44,9 +44,9 @@ module "eks" {
       instance_types  = ["m5.large"]
       subnet_ids      = data.terraform_remote_state.vpc-state.outputs.k8s-private-subnets
       capacity_type   = "ON_DEMAND"
-      desired_size    = 4
-      min_size        = 4
-      max_size        = 5
+      desired_size    = 2
+      min_size        = 2
+      max_size        = 2
     }
   }
 }
