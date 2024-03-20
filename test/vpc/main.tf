@@ -9,6 +9,7 @@ provider "aws" {
     }
   }
 }
+
 module "dissco-k8s-vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.0.0"
@@ -33,6 +34,9 @@ module "dissco-k8s-vpc" {
   default_route_table_tags      = { Name = "dissco-k8s-route-table-test" }
   manage_default_security_group = true
   default_security_group_tags   = { Name = "dissco-k8s-sg-test" }
+  private_subnet_tags = {
+    "karpenter.sh/discovery" = "dissco-k8s-test"
+  }
 }
 
 module "dissco-database-vpc" {
@@ -65,13 +69,6 @@ resource "aws_security_group" "dissco-database-sg" {
     protocol    = "tcp"
     description = "PostgreSQL access from within VPC"
     cidr_blocks = [module.dissco-database-vpc.vpc_cidr_block, module.dissco-k8s-vpc.vpc_cidr_block]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access for Sam Home"
-    cidr_blocks = ["87.208.51.107/32"]
   }
   ingress {
     from_port   = 5432
@@ -121,6 +118,20 @@ resource "aws_security_group" "dissco-database-sg" {
     protocol    = "tcp"
     description = "PostgreSQL access for Naturalis Network"
     cidr_blocks = ["145.136.247.125/32"]
+  }
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    description = "PostgreSQL access for Sam Home"
+    cidr_blocks = ["85.144.90.28/32"]
+  }
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    description = "PostgreSQL access for Sou Home"
+    cidr_blocks = ["94.213.247.69/32"]
   }
   ingress {
     from_port   = 27017
