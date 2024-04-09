@@ -89,7 +89,8 @@ module "iam_assumable_role_admin" {
   role_policy_arns              = [aws_iam_policy.eks-secret-manager.arn]
   oidc_fully_qualified_subjects = [
     "system:serviceaccount:default:secret-manager",
-    "system:serviceaccount:default:dissco-orchestration-backend-sa"
+    "system:serviceaccount:default:dissco-orchestration-backend-sa",
+    "system:serviceaccount:default:nu-search-sa"
   ]
 }
 
