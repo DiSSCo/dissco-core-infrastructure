@@ -90,7 +90,8 @@ module "iam_assumable_role_admin" {
   oidc_fully_qualified_subjects = [
     "system:serviceaccount:default:secret-manager",
     "system:serviceaccount:default:dissco-orchestration-backend-sa",
-    "system:serviceaccount:default:nu-search-sa"
+    "system:serviceaccount:default:nu-search-sa",
+    "system:serviceaccount:translator-services:translator-secret-manager"
   ]
 }
 
