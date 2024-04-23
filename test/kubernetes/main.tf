@@ -25,7 +25,7 @@ module "eks" {
   version = "20.5.0"
 
   cluster_name                   = "dissco-k8s-test"
-  cluster_version                = 1.28
+  cluster_version                = 1.29
   cluster_endpoint_public_access = true
   authentication_mode            = "API_AND_CONFIG_MAP"
 
@@ -74,7 +74,7 @@ module "eks_blueprints_kubernetes_addons" {
     app-of-apps = {
       repo_url           = "https://github.com/DiSSCo/dissco-core-deployment"
       target_revision    = "HEAD"
-      path               = "shared-resources"
+      path               = "test-helm-resources"
       add_on_application = true
     }
   }
