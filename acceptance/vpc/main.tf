@@ -33,6 +33,9 @@ module "dissco-k8s-vpc" {
   default_route_table_tags      = { Name = "dissco-k8s-route-table-acc" }
   manage_default_security_group = true
   default_security_group_tags   = { Name = "dissco-k8s-sg-acc" }
+  private_subnet_tags = {
+    "karpenter.sh/discovery" = "dissco-k8s-acc"
+  }
 }
 
 module "dissco-database-vpc" {
@@ -71,7 +74,7 @@ resource "aws_security_group" "dissco-database-sg" {
     to_port     = 5432
     protocol    = "tcp"
     description = "PostgreSQL access for Sam Home"
-    cidr_blocks = ["87.208.51.107/32"]
+    cidr_blocks = ["85.144.90.28/32"]
   }
   ingress {
     from_port   = 5432
