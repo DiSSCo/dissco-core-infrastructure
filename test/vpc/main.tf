@@ -75,7 +75,7 @@ resource "aws_security_group" "dissco-database-sg" {
     to_port     = 5432
     protocol    = "tcp"
     description = "PostgreSQL access for Tom Office"
-    cidr_blocks = ["163.158.243.104/32"]
+    cidr_blocks = ["81.172.128.113/32"]
   }
   ingress {
     from_port   = 5432
@@ -171,4 +171,17 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
   route_table_id            = module.dissco-k8s-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.101.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
+}
+
+resource "aws_vpc_peering_connection" "handle_peering" {
+  peer_vpc_id = module.dissco-k8s-vpc.vpc_id
+  vpc_id      = module.dissco-database-vpc.vpc_id
+  auto_accept = true
+  requester {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  accepter {
+    allow_remote_vpc_dns_resolution = true
+  }
 }
