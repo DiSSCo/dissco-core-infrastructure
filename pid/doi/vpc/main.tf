@@ -148,14 +148,14 @@ resource "aws_vpc_peering_connection" "doi_k8s_peering" {
   }
 }
 
-resource "aws_route" "route_table_entry_kubernetes_database" {
-  route_table_id            = module.doi-vpc.database_route_table_ids[0]
+resource "aws_route" "route_table_entry_kubernetes_public" {
+  route_table_id            = module.doi-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.101.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
 }
 
-resource "aws_route" "route_table_entry_kubernetes_public" {
-  route_table_id            = module.doi-vpc.public_route_table_ids[0]
+resource "aws_route" "route_table_entry_kubernetes_database" {
+  route_table_id            = module.doi-vpc.database_route_table_ids[0]
   destination_cidr_block    = "10.101.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
 }

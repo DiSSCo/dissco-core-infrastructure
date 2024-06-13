@@ -91,7 +91,7 @@ data "terraform_remote_state" "vpc-state" {
   }
 }
 
-resource "aws_vpc_peering_connection" "database_peering" {
+resource "aws_vpc_peering_connection" "handle_database_peering" {
   peer_vpc_id = module.handle-server-vpc.vpc_id
   vpc_id      = data.terraform_remote_state.vpc-state.outputs.db-vpc-id-test
   auto_accept = true
@@ -106,6 +106,12 @@ resource "aws_vpc_peering_connection" "database_peering" {
 
 resource "aws_route" "route_table_entry_database_public" {
   route_table_id            = module.handle-server-vpc.public_route_table_ids[0]
+  destination_cidr_block    = "10.101.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
+}
+
+resource "aws_route" "route_table_entry_database_public" {
+  route_table_id            = module.handle-server-vpc.database_route_table_ids[0]
   destination_cidr_block    = "10.101.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }

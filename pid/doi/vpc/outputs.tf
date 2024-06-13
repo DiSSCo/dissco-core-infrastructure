@@ -9,7 +9,7 @@ output "doi_server_subnets" {
 }
 
 output "doi_peering_id" {
-  value       = module.doi-vpc.aws_vpc_peering_connection.doi_k8s_peering.id
+  value       = aws_vpc_peering_connection.doi_k8s_peering.id
   description = "Public subnet of the DOI Server"
 }
 
