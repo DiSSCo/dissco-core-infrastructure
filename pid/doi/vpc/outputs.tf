@@ -5,7 +5,7 @@ output "doi_database_subnets" {
 
 output "doi_server_subnets" {
   value       = module.doi-vpc.public_subnets
-  description = "Private subnet of the DOI Server"
+  description = "Public subnet of the DOI Server"
 }
 
 output "doi_database_security_group" {

@@ -172,16 +172,3 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
   destination_cidr_block    = "10.101.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
-
-resource "aws_vpc_peering_connection" "handle_peering" {
-  peer_vpc_id = module.dissco-k8s-vpc.vpc_id
-  vpc_id      = module.dissco-database-vpc.vpc_id
-  auto_accept = true
-  requester {
-    allow_remote_vpc_dns_resolution = true
-  }
-
-  accepter {
-    allow_remote_vpc_dns_resolution = true
-  }
-}

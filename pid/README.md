@@ -19,11 +19,11 @@ The DOI storage is kept separate from the DiSSCo infrastructure, while Handles a
 
 In both cases, there is a document store for each environment: Test, Acceptance, and Production. Only production PIDs are resolvable; in Test and Acceptance, they are given the prefixes "TEST" and "SANDBOX", which prevents the server from resolving them. 
 
-## Network
-
-
 ## API
-A custom API, deployed on the DiSSCo Kubernetes clusters, interfaces with 
+The [Handle Manager API](https://github.com/DiSSCo/handle-manager) is deployed twice on the DiSSCo Kubernetes cluster. The Handle deployment interfaces with the Handle storage, and the DOI deployment interfaces with the DOI storage. The DOI profile also communicates asynchronously with the [DataCite Publisher](https://github.com/DiSSCo/datacite-publisher/).
+
+## Network
+Peering connections between the Handle VPC and the DiSSCo VPC, and between the DOI VPC and DiSSCo VPC, need to be established. The Handle Server needs read access to its database, which is deployed over the DiSSCo VPC. On the other hand, the DOI API (deployed on the DiSSCo VPC) needs read/write access to the DOI database, which is deployed over the DOI VPC. Though the storage solutions differ between DOI and Handle infrastructures, the resulting peering connections are the same. 
 
 # Handle Server Installation and Deployment Guide
 
