@@ -13,12 +13,12 @@ provider "aws" {
 module "handle-server-vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name       = "handle-vpc"
-  cidr       = "10.200.0.0/16"
-  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
-  private_subnets = ["10.200.1.0/24", "10.200.2.0/24", "10.200.3.0/24"]
-  public_subnets = ["10.200.101.0/24", "10.200.102.0/24", "10.200.103.0/24"]
-  create_igw = true
+  name                = "handle-vpc"
+  cidr                = "10.2.0.0/16"
+  azs                 = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  private_subnets     = ["10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
+  public_subnets      = ["10.2.101.0/24", "10.2.102.0/24", "10.2.103.0/24"]
+  create_igw          = true
 
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -104,13 +104,7 @@ resource "aws_vpc_peering_connection" "database_peering" {
   }
 }
 
-resource "aws_route" "route_table_entry_kubernetes_private" {
-  route_table_id            = module.handle-server-vpc.private_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
-}
-
-resource "aws_route" "route_table_entry_kubernetes_public" {
+resource "aws_route" "route_table_entry_database_public" {
   route_table_id            = module.handle-server-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.101.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id

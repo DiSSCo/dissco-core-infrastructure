@@ -23,7 +23,11 @@ In both cases, there is a document store for each environment: Test, Acceptance,
 The [Handle Manager API](https://github.com/DiSSCo/handle-manager) is deployed twice on the DiSSCo Kubernetes cluster. The Handle deployment interfaces with the Handle storage, and the DOI deployment interfaces with the DOI storage. The DOI profile also communicates asynchronously with the [DataCite Publisher](https://github.com/DiSSCo/datacite-publisher/).
 
 ## Network
-Peering connections between the Handle VPC and the DiSSCo VPC, and between the DOI VPC and DiSSCo VPC, need to be established. The Handle Server needs read access to its database, which is deployed over the DiSSCo VPC. On the other hand, the DOI API (deployed on the DiSSCo VPC) needs read/write access to the DOI database, which is deployed over the DOI VPC. Though the storage solutions differ between DOI and Handle infrastructures, the resulting peering connections are the same. 
+Peering connections between VPCs need to be established, according to the servers' storage solutions.
+
+The Hanndle Server's storage is deployed in a separate VPC, the DiSSCo DB VPC, so a peering connection needs to be established between the Handle Server and the DB VPC.
+
+On the other hand, the DOI Server is deployed on the same VPC as its database, the DOI VPC. However, the DOI API, which is deployed on the DiSSCo K8s VPC, needs read/write access to the database. Therefore, a peering connection needs to be established between the DOI VPC and the DiSSCo K8s VPC. 
 
 # Handle Server Installation and Deployment Guide
 
@@ -95,6 +99,7 @@ The public IP address will be automatically populated in the `siteinfo.json` fil
 ### 4. Storage
 
 This section describes how to set up a PostgreSQL database for Handle storage. More information can be found in the [Handle Techincal Manual](http://www.handle.net/tech_manual/HN_Tech_Manual_9.pdf).
+Documentation on how to setup a MongoDB database for Handle Storage will be added later. 
 
 Note: When you start the handle server, you must have the JDBC driver for your database in your classpath. Place the jar file (e.g. postgresql8jdbc3.jar) in the lib subdirectory of the unzipped Handle.Net distribution.
 
