@@ -26,14 +26,14 @@ resource "aws_db_instance" "default" {
   max_allocated_storage  = 100
   db_name                = "bluestorage"
   engine                 = "postgres"
-  engine_version         = "15.2"
-  instance_class         = "db.m6g.micro"
+  engine_version         = "15.5"
+  instance_class         = "db.t3.micro"
   publicly_accessible    = true
   db_subnet_group_name   = data.terraform_remote_state.vpc-state.outputs.blue_database_subnets
   vpc_security_group_ids = [
     data.terraform_remote_state.vpc-state.outputs.blue_database_security_group
   ]
-  username                    = "doimasteruser"
+  username                    = "bluetaxonomist"
   manage_master_user_password = true
   skip_final_snapshot         = true
   backup_retention_period     = 14

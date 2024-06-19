@@ -46,7 +46,7 @@ resource "aws_security_group" "blue-database-sg" {
     to_port     = 5432
     protocol    = "tcp"
     description = "PostgreSQL access for Sou"
-    cidr_blocks = ["118.93.181.167/32"]
+    cidr_blocks = ["203.109.214.6/32"]
   }
 
   ingress {
@@ -58,9 +58,9 @@ resource "aws_security_group" "blue-database-sg" {
   }
 }
 
-resource "aws_security_group" "blue-server-sg" {
-  name        = "blue-server-sg"
-  description = "blue server security group"
+resource "aws_security_group" "blue-api-sg" {
+  name        = "blue-api-sg"
+  description = "BLUE API security group"
   vpc_id      = module.blue-bicikl-vpc.vpc_id
 
   # ingress
@@ -83,7 +83,7 @@ resource "aws_security_group" "blue-server-sg" {
     to_port     = 22
     protocol    = "tcp"
     description = "SSH Access for Sou"
-    cidr_blocks = ["118.93.181.167/32"]
+    cidr_blocks = ["203.109.214.6/32"]
   }
   ingress {
     from_port   = 8000

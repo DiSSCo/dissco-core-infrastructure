@@ -15,14 +15,14 @@ data "terraform_remote_state" "vpc-state" {
   backend = "s3"
 
   config = {
-    bucket = "doi-terraform-state-backend"
-    key    = "doi/vpc/terraform.tfstate"
+    bucket = "dissco-terraform-state-backend"
+    key    = "blue-bicikl/vpc/terraform.tfstate"
     region = "eu-west-2"
   }
 }
 
 resource "aws_key_pair" "key_pair" {
-  key_name = "doi_key"
+  key_name = "blue_key"
   public_key = file("./blue-bicikl.pub")
 }
 
@@ -34,6 +34,6 @@ resource "aws_instance" "blue-bicikl" {
 
   key_name = aws_key_pair.key_pair.key_name
 
-  subnet_id = data.terraform_remote_state.vpc-state.outputs.blue_subnets[0]
-  vpc_security_group_ids = [data.terraform_remote_state.vpc-state.outputs.blue_security_group]
+  subnet_id = data.terraform_remote_state.vpc-state.outputs.blue_public_subnets[0]
+  vpc_security_group_ids = [data.terraform_remote_state.vpc-state.outputs.blue_api_security_group]
 }
