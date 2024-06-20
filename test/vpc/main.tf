@@ -142,6 +142,8 @@ resource "aws_security_group" "dissco-database-sg" {
   }
 }
 
+/*
+
 data "terraform_remote_state" "doi-vpc-state" {
   backend = "s3"
 
@@ -150,7 +152,7 @@ data "terraform_remote_state" "doi-vpc-state" {
     key    = "doi/vpc/terraform.tfstate"
     region = "eu-west-2"
   }
-}
+}*/
 
 data "terraform_remote_state" "handle-vpc-state" {
   backend = "s3"
@@ -193,22 +195,25 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
 
+/*
+
 resource "aws_route" "route_table_entry_doi_db_private" {
   route_table_id            = module.dissco-k8s-vpc.private_route_table_ids[0]
   destination_cidr_block    = "10.200.0.0/16"
-  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.doi_peering_id
+  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
 }
 
 resource "aws_route" "route_table_entry_doi_db_public" {
   route_table_id            = module.dissco-k8s-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.200.0.0/16"
-  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.doi_peering_id
+  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
 }
+*/
 
-resource "aws_route" "route_table_entry_handle_server_public" {
-  route_table_id            = module.dissco-k8s-vpc.public_route_table_ids[0]
+resource "aws_route" "route_table_entry_database_subnet_to_handle" {
+  route_table_id            = module.dissco-database-vpc.database_route_table_ids[0]
   destination_cidr_block    = "10.2.0.0/16"
-  vpc_peering_connection_id = data.terraform_remote_state.handle-vpc-state.handle_peering_id
+  vpc_peering_connection_id = data.terraform_remote_state.handle-vpc-state.outputs.handle_peering_id
 }
 
 

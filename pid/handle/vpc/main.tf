@@ -18,8 +18,8 @@ module "handle-server-vpc" {
   azs                 = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   private_subnets     = ["10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
   public_subnets      = ["10.2.101.0/24", "10.2.102.0/24", "10.2.103.0/24"]
-  create_igw          = true
 
+  create_igw           = true
   enable_dns_hostnames = true
   enable_dns_support   = true
 }
@@ -55,6 +55,13 @@ resource "aws_security_group" "handle-server-sg" {
     from_port   = 0
     to_port     = 22
     protocol    = "tcp"
+    description = "SSH Access for Sou Temp"
+    cidr_blocks = ["203.109.214.6/32"]
+  }
+  ingress {
+    from_port   = 0
+    to_port     = 22
+    protocol    = "tcp"
     description = "SSH Access for Sam Home"
     cidr_blocks = ["85.144.90.28/32"]
   }
@@ -79,6 +86,12 @@ resource "aws_security_group" "handle-server-sg" {
     description = "HTTP Access to Handle Server"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 data "terraform_remote_state" "vpc-state" {
@@ -91,7 +104,7 @@ data "terraform_remote_state" "vpc-state" {
   }
 }
 
-resource "aws_vpc_peering_connection" "handle_database_peering" {
+resource "aws_vpc_peering_connection" "handle_to_db_peering" {
   peer_vpc_id = module.handle-server-vpc.vpc_id
   vpc_id      = data.terraform_remote_state.vpc-state.outputs.db-vpc-id-test
   auto_accept = true
@@ -104,15 +117,26 @@ resource "aws_vpc_peering_connection" "handle_database_peering" {
   }
 }
 
-resource "aws_route" "route_table_entry_database_public" {
+resource "aws_route" "route_table_entry_handle_database" {
   route_table_id            = module.handle-server-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
 }
 
-resource "aws_route" "route_table_entry_database_public" {
-  route_table_id            = module.handle-server-vpc.database_route_table_ids[0]
+resource "aws_route" "route_table_entry_handle_private_0" {
+  route_table_id            = module.handle-server-vpc.private_route_table_ids[0]
   destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
 }
 
+resource "aws_route" "route_table_entry_handle_private_1" {
+  route_table_id            = module.handle-server-vpc.private_route_table_ids[1]
+  destination_cidr_block    = "10.101.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
+}
+
+resource "aws_route" "route_table_entry_handle_private_2" {
+  route_table_id            = module.handle-server-vpc.private_route_table_ids[2]
+  destination_cidr_block    = "10.101.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
+}
