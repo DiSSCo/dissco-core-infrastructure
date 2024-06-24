@@ -17,23 +17,23 @@ module "dissco-k8s-vpc" {
   name = "dissco-k8s-vpc-test"
   cidr = "10.100.0.0/16"
 
-  azs             = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
-  public_subnets  = ["10.100.0.0/19", "10.100.32.0/19", "10.100.64.0/19"]
+  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  public_subnets = ["10.100.0.0/19", "10.100.32.0/19", "10.100.64.0/19"]
   private_subnets = ["10.100.96.0/19", "10.100.128.0/19", "10.100.160.0/19"]
 
   enable_nat_gateway   = true
   create_igw           = true
   enable_dns_hostnames = true
   enable_dns_support   = true
-  single_nat_gateway   = true
+  single_nat_gateway = true
 
   # Manage so we can name
   manage_default_network_acl    = true
-  default_network_acl_tags      = { Name = "dissco-k8s-network-acl-test" }
+  default_network_acl_tags = { Name = "dissco-k8s-network-acl-test" }
   manage_default_route_table    = true
-  default_route_table_tags      = { Name = "dissco-k8s-route-table-test" }
+  default_route_table_tags = { Name = "dissco-k8s-route-table-test" }
   manage_default_security_group = true
-  default_security_group_tags   = { Name = "dissco-k8s-sg-test" }
+  default_security_group_tags = { Name = "dissco-k8s-sg-test" }
   private_subnet_tags = {
     "karpenter.sh/discovery" = "dissco-k8s-test"
   }
@@ -44,10 +44,10 @@ module "dissco-database-vpc" {
 
   name                                   = "dissco-database-vpc-test"
   cidr                                   = "10.101.0.0/16"
-  azs                                    = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
-  private_subnets                        = ["10.101.1.0/24", "10.101.2.0/24", "10.101.3.0/24"]
-  public_subnets                         = ["10.101.101.0/24", "10.101.102.0/24", "10.101.103.0/24"]
-  database_subnets                       = ["10.101.201.0/24", "10.101.202.0/24", "10.101.203.0/24"]
+  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  private_subnets = ["10.101.1.0/24", "10.101.2.0/24", "10.101.3.0/24"]
+  public_subnets = ["10.101.101.0/24", "10.101.102.0/24", "10.101.103.0/24"]
+  database_subnets = ["10.101.201.0/24", "10.101.202.0/24", "10.101.203.0/24"]
   create_igw                             = true
   create_database_subnet_group           = true
   create_database_subnet_route_table     = true
