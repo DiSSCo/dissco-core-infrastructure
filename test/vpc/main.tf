@@ -57,6 +57,16 @@ module "dissco-database-vpc" {
   enable_dns_support   = true
 }
 
+data "terraform_remote_state" "handle-vpc-state" {
+  backend = "s3"
+
+  config = {
+    bucket = "dissco-terraform-state-backend"
+    key    = "handle/vpc/terraform.tfstate"
+    region = "eu-west-2"
+  }
+}
+
 resource "aws_security_group" "dissco-database-sg" {
   name        = "dissco-database-sg-test"
   description = "Test database security group"
@@ -140,6 +150,13 @@ resource "aws_security_group" "dissco-database-sg" {
     description = "MongoDB access from within VPC"
     cidr_blocks = [module.dissco-database-vpc.vpc_cidr_block, module.dissco-k8s-vpc.vpc_cidr_block]
   }
+  ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    description = "MongoDB access for Handle Server"
+    cidr_blocks = [data.terraform_remote_state.handle-vpc-state.outputs.handle_cidr_block]
+  }
 }
 
 /*
@@ -153,16 +170,6 @@ data "terraform_remote_state" "doi-vpc-state" {
     region = "eu-west-2"
   }
 }*/
-
-data "terraform_remote_state" "handle-vpc-state" {
-  backend = "s3"
-
-  config = {
-    bucket = "dissco-terraform-state-backend"
-    key    = "handle/vpc/terraform.tfstate"
-    region = "eu-west-2"
-  }
-}
 
 resource "aws_vpc_peering_connection" "database_peering" {
   peer_vpc_id = module.dissco-k8s-vpc.vpc_id

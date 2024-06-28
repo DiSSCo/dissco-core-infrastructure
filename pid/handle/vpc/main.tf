@@ -66,6 +66,13 @@ resource "aws_security_group" "handle-server-sg" {
     cidr_blocks = ["85.144.90.28/32"]
   }
   ingress {
+    from_port   = 0
+    to_port     = 22
+    protocol    = "tcp"
+    description = "SSH Access for EduVPN"
+    cidr_blocks = ["145.90.236.12/32"]
+  }
+  ingress {
     from_port   = 2641
     to_port     = 2641
     protocol    = "tcp"
@@ -83,7 +90,7 @@ resource "aws_security_group" "handle-server-sg" {
     from_port   = 8000
     to_port     = 8000
     protocol    = "tcp"
-    description = "HTTP Access to Handle Server"
+    description = "HTTP Access to Handle VPC"
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
