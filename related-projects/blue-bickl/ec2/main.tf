@@ -29,11 +29,16 @@ resource "aws_key_pair" "key_pair" {
 
 resource "aws_instance" "blue-bicikl" {
   ami                         = "ami-0a244485e2e4ffd03"
-  instance_type               = "t3.small"
+  instance_type               = "t3.medium"
   associate_public_ip_address = true
 
   key_name = aws_key_pair.key_pair.key_name
 
   subnet_id = data.terraform_remote_state.vpc-state.outputs.blue_public_subnets[0]
   vpc_security_group_ids = [data.terraform_remote_state.vpc-state.outputs.blue_api_security_group]
+}
+
+resource "aws_eip" "static_ip" {
+  domain   = "vpc"
+  instance = aws_instance.blue-bicikl.id
 }

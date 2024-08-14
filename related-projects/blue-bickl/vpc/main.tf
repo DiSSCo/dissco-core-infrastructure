@@ -45,8 +45,8 @@ resource "aws_security_group" "blue-database-sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    description = "PostgreSQL access for Sou"
-    cidr_blocks = ["203.109.214.6/32"]
+    description = "PostgreSQL access for Naturalis"
+    cidr_blocks = ["145.136.247.119/32"]
   }
 
   ingress {
