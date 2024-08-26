@@ -22,3 +22,8 @@ output "db-vpc-id-test" {
   value       = module.dissco-database-vpc.vpc_id
   description = "Vpc id of the database"
 }
+
+output "k8s-eggress-ip" {
+  value       = aws_eip.k8s-eggress-ip.public_ip
+  description = "The eggress ip of the k8s vpc"
+}

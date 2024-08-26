@@ -9,6 +9,11 @@ provider "aws" {
     }
   }
 }
+
+resource "aws_eip" "k8s-eggress-ip" {
+  domain   = "vpc"
+}
+
 module "dissco-k8s-vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.0.0"
@@ -24,7 +29,11 @@ module "dissco-k8s-vpc" {
   create_igw           = true
   enable_dns_hostnames = true
   enable_dns_support   = true
+
+  # Ensure we get a single eggress NAT Gateway with fixed IP
   single_nat_gateway   = true
+  reuse_nat_ips       = true                    # <= Skip creation of EIPs for the NAT Gateways
+  external_nat_ip_ids = aws_eip.k8s-eggress-ip.*.id
 
   # Manage so we can name
   manage_default_network_acl    = true

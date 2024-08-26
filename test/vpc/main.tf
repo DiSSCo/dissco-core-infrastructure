@@ -10,6 +10,10 @@ provider "aws" {
   }
 }
 
+resource "aws_eip" "k8s-eggress-ip" {
+  domain   = "vpc"
+}
+
 module "dissco-k8s-vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.0.0"
@@ -25,7 +29,11 @@ module "dissco-k8s-vpc" {
   create_igw           = true
   enable_dns_hostnames = true
   enable_dns_support   = true
-  single_nat_gateway = true
+
+  # Ensure we get a single eggress NAT Gateway with fixed IP
+  single_nat_gateway   = true
+  reuse_nat_ips       = true                    # <= Skip creation of EIPs for the NAT Gateways
+  external_nat_ip_ids = aws_eip.k8s-eggress-ip.*.id
 
   # Manage so we can name
   manage_default_network_acl    = true
@@ -159,18 +167,6 @@ resource "aws_security_group" "dissco-database-sg" {
   }
 }
 
-/*
-
-data "terraform_remote_state" "doi-vpc-state" {
-  backend = "s3"
-
-  config = {
-    bucket = "dissco-terraform-state-backend"
-    key    = "doi/vpc/terraform.tfstate"
-    region = "eu-west-2"
-  }
-}*/
-
 resource "aws_vpc_peering_connection" "database_peering" {
   peer_vpc_id = module.dissco-k8s-vpc.vpc_id
   vpc_id      = module.dissco-database-vpc.vpc_id
@@ -201,21 +197,6 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
   destination_cidr_block    = "10.101.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
-
-/*
-
-resource "aws_route" "route_table_entry_doi_db_private" {
-  route_table_id            = module.dissco-k8s-vpc.private_route_table_ids[0]
-  destination_cidr_block    = "10.200.0.0/16"
-  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
-}
-
-resource "aws_route" "route_table_entry_doi_db_public" {
-  route_table_id            = module.dissco-k8s-vpc.public_route_table_ids[0]
-  destination_cidr_block    = "10.200.0.0/16"
-  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
-}
-*/
 
 resource "aws_route" "route_table_entry_database_subnet_to_handle" {
   route_table_id            = module.dissco-database-vpc.database_route_table_ids[0]

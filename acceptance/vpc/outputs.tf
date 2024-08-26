@@ -17,3 +17,8 @@ output "k8s-vpc-id" {
   value       = module.dissco-k8s-vpc.vpc_id
   description = "Vpc id of the k8s virtual network"
 }
+
+output "k8s-eggress-ip" {
+  value       = aws_eip.k8s-eggress-ip.public_ip
+  description = "The eggress ip of the k8s vpc"
+}
