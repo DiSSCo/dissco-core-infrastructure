@@ -25,7 +25,8 @@ resource "aws_db_instance" "default" {
   max_allocated_storage       = 100
   db_name                     = "disscodatabasetest"
   engine                      = "postgres"
-  engine_version              = "15.2"
+  engine_version              = "16.4"
+  allow_major_version_upgrade = true
   instance_class              = "db.m6g.large"
   publicly_accessible         = true
   db_subnet_group_name        = data.terraform_remote_state.vpc-state.outputs.database_subnet_group
