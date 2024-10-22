@@ -11,17 +11,10 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "data-export-bucket" {
-  bucket = "data-export-results"
+  bucket = "dissco-data-export"
 }
 
-resource "aws_s3_bucket_ownership_controls" "bucket-ownership" {
-  bucket = aws_s3_bucket.data-export-bucket.id
-  rule {
-    object_ownership = "BucketOwnerPreferred"
-  }
-}
-
-resource "aws_s3_bucket_public_access_block" "bucket-access-block" {
+resource "aws_s3_bucket_public_access_block" "data-export-public-access" {
   bucket = aws_s3_bucket.data-export-bucket.id
 
   block_public_acls       = false
@@ -30,12 +23,38 @@ resource "aws_s3_bucket_public_access_block" "bucket-access-block" {
   restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_acl" "bucket-acl" {
-  depends_on = [
-    aws_s3_bucket_ownership_controls.bucket-ownership,
-    aws_s3_bucket_public_access_block.bucket-access-block,
-  ]
-
+resource "aws_s3_bucket_policy" "allow-access-to-data-export" {
   bucket = aws_s3_bucket.data-export-bucket.id
-  acl    = "public-read"
+  policy = data.aws_iam_policy_document.bucket-policy.json
+}
+
+data "aws_iam_policy_document" "bucket-policy" {
+  statement {
+    principals {
+      identifiers = ["*"]
+      type = "*"
+    }
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+    resources = [
+      aws_s3_bucket.data-export-bucket.arn,
+      "${aws_s3_bucket.data-export-bucket.arn}/*",
+    ]
+  }
+  statement {
+    principals {
+      identifiers = ["//need agent arn"]
+      type = "AWS"
+    }
+    actions = [
+      "*"
+    ]
+    resources = [
+      aws_s3_bucket.data-export-bucket.arn,
+      "${aws_s3_bucket.data-export-bucket.arn}/*",
+    ]
+  }
+
 }
