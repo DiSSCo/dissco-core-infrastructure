@@ -11,7 +11,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "data-export-bucket" {
-  bucket = "dissco-data-export"
+  bucket = "dissco-data-export-test"
 }
 
 resource "aws_s3_bucket_public_access_block" "data-export-public-access" {
