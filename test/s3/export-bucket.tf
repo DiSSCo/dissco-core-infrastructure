@@ -10,6 +10,10 @@ provider "aws" {
   }
 }
 
+resource "aws_iam_user" "export-bucket-agent" {
+  name = "export-bucket-agent"
+}
+
 resource "aws_s3_bucket" "data-export-bucket" {
   bucket = "dissco-data-export-test"
 }
@@ -45,11 +49,14 @@ data "aws_iam_policy_document" "bucket-policy" {
   }
   statement {
     principals {
-      identifiers = ["//need agent arn"]
+      identifiers = [aws_iam_user.export-bucket-agent.arn]
       type = "AWS"
     }
     actions = [
-      "*"
+      "s3:PutObject",
+      "s3:PutObjectAcl",
+      "s3:GetObject",
+      "s3:GetObjectAcl"
     ]
     resources = [
       aws_s3_bucket.data-export-bucket.arn,
