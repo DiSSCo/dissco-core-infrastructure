@@ -28,6 +28,7 @@ module "eks" {
   cluster_version                = 1.29
   cluster_endpoint_public_access = true
   authentication_mode            = "API_AND_CONFIG_MAP"
+  cloudwatch_log_group_retention_in_days = 0
 
   # EKS Cluster VPC and Subnet mandatory config
   vpc_id     = data.terraform_remote_state.vpc-state.outputs.k8s-vpc-id
@@ -91,7 +92,10 @@ module "iam_assumable_role_admin" {
     "system:serviceaccount:default:secret-manager",
     "system:serviceaccount:default:dissco-orchestration-backend-sa",
     "system:serviceaccount:default:nu-search-sa",
-    "system:serviceaccount:translator-services:translator-secret-manager"
+    "system:serviceaccount:default:data-exporter-backend-service-account",
+    "system:serviceaccount:translator-services:translator-secret-manager",
+    "system:serviceaccount:machine-annotation-services:mas-secret-manager",
+    "system:serviceaccount:data-export-job:data-export-job-service-account"
   ]
 }
 
