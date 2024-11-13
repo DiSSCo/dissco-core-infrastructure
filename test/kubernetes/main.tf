@@ -95,7 +95,8 @@ module "iam_assumable_role_admin" {
     "system:serviceaccount:default:data-exporter-backend-service-account",
     "system:serviceaccount:translator-services:translator-secret-manager",
     "system:serviceaccount:machine-annotation-services:mas-secret-manager",
-    "system:serviceaccount:data-export-job:data-export-job-service-account"
+    "system:serviceaccount:data-export-job:data-export-job-service-account",
+    "system:serviceaccount:otel:otel-service-account"
   ]
 }
 
