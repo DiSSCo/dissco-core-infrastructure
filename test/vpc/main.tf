@@ -120,6 +120,13 @@ resource "aws_security_group" "dissco-database-sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
+    description = "PostgreSQL access for Naturalis EduVPN"
+    cidr_blocks = ["145.90.236.12/32"]
+  }
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
     description = "PostgreSQL access for Naturalis Network"
     cidr_blocks = ["145.136.247.125/32"]
   }
@@ -136,13 +143,6 @@ resource "aws_security_group" "dissco-database-sg" {
     protocol    = "tcp"
     description = "PostgreSQL access for Naturalis Network"
     cidr_blocks = ["145.136.247.125/32"]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access for Sam Home"
-    cidr_blocks = ["85.144.90.28/32"]
   }
   ingress {
     from_port   = 5432
