@@ -2,7 +2,7 @@ provider "aws" {
   region = "eu-west-2"
   default_tags {
     tags = {
-      Environment = "Test"
+      Environment = "Production"
       Owner       = "DiSSCo"
       Project     = "DiSSCo Core"
       Terraform   = "True"
@@ -11,51 +11,52 @@ provider "aws" {
 }
 
 resource "aws_eip" "k8s-eggress-ip" {
-  domain   = "vpc"
+  domain = "vpc"
 }
 
 module "dissco-k8s-vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.0.0"
+  version = "5.16.0"
 
-  name = "dissco-k8s-vpc-test"
-  cidr = "10.100.0.0/16"
+  name = "dissco-k8s-vpc-production"
+  cidr = "10.0.0.0/16"
 
   azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
-  public_subnets = ["10.100.0.0/19", "10.100.32.0/19", "10.100.64.0/19"]
-  private_subnets = ["10.100.96.0/19", "10.100.128.0/19", "10.100.160.0/19"]
+  public_subnets = ["10.0.0.0/19", "10.0.32.0/19", "10.0.64.0/19"]
+  private_subnets = ["10.0.96.0/19", "10.0.128.0/19", "10.0.160.0/19"]
 
   enable_nat_gateway   = true
   create_igw           = true
   enable_dns_hostnames = true
-  enable_dns_support   = true
+  enable_dns_support = true
 
   # Ensure we get a single eggress NAT Gateway with fixed IP
-  single_nat_gateway   = true
-  reuse_nat_ips       = true                    # <= Skip creation of EIPs for the NAT Gateways
+  single_nat_gateway = true
+  reuse_nat_ips = true                    # <= Skip creation of EIPs for the NAT Gateways
   external_nat_ip_ids = aws_eip.k8s-eggress-ip.*.id
 
   # Manage so we can name
   manage_default_network_acl    = true
-  default_network_acl_tags = { Name = "dissco-k8s-network-acl-test" }
+  default_network_acl_tags = { Name = "dissco-k8s-network-acl-production" }
   manage_default_route_table    = true
-  default_route_table_tags = { Name = "dissco-k8s-route-table-test" }
+  default_route_table_tags = { Name = "dissco-k8s-route-table-production" }
   manage_default_security_group = true
-  default_security_group_tags = { Name = "dissco-k8s-sg-test" }
+  default_security_group_tags = { Name = "dissco-k8s-sg-production" }
   private_subnet_tags = {
-    "karpenter.sh/discovery" = "dissco-k8s-test"
+    "karpenter.sh/discovery" = "dissco-k8s-production"
   }
 }
 
 module "dissco-database-vpc" {
   source = "terraform-aws-modules/vpc/aws"
+  version = "5.16.0"
 
-  name                                   = "dissco-database-vpc-test"
-  cidr                                   = "10.101.0.0/16"
+  name                                   = "dissco-database-vpc-production"
+  cidr                                   = "10.1.0.0/16"
   azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
-  private_subnets = ["10.101.1.0/24", "10.101.2.0/24", "10.101.3.0/24"]
-  public_subnets = ["10.101.101.0/24", "10.101.102.0/24", "10.101.103.0/24"]
-  database_subnets = ["10.101.201.0/24", "10.101.202.0/24", "10.101.203.0/24"]
+  private_subnets = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
+  public_subnets = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
+  database_subnets = ["10.1.201.0/24", "10.1.202.0/24", "10.1.203.0/24"]
   create_igw                             = true
   create_database_subnet_group           = true
   create_database_subnet_route_table     = true
@@ -75,9 +76,19 @@ data "terraform_remote_state" "handle-vpc-state" {
   }
 }
 
+data "terraform_remote_state" "doi-vpc-state" {
+  backend = "s3"
+
+  config = {
+    bucket = "dissco-terraform-state-backend"
+    key    = "doi/vpc/terraform.tfstate"
+    region = "eu-west-2"
+  }
+}
+
 resource "aws_security_group" "dissco-database-sg" {
-  name        = "dissco-database-sg-test"
-  description = "Test database security group"
+  name        = "dissco-database-sg-production"
+  description = "Production database security group"
   vpc_id      = module.dissco-database-vpc.vpc_id
 
   # ingress
@@ -167,6 +178,8 @@ resource "aws_security_group" "dissco-database-sg" {
   }
 }
 
+
+# K8s/DB Peering
 resource "aws_vpc_peering_connection" "database_peering" {
   peer_vpc_id = module.dissco-k8s-vpc.vpc_id
   vpc_id      = module.dissco-database-vpc.vpc_id
@@ -182,21 +195,41 @@ resource "aws_vpc_peering_connection" "database_peering" {
 
 resource "aws_route" "route_table_entry_database" {
   route_table_id            = module.dissco-database-vpc.database_route_table_ids[0]
-  destination_cidr_block    = "10.100.0.0/16"
+  destination_cidr_block    = "10.0.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
 
 resource "aws_route" "route_table_entry_kubernetes_private" {
   route_table_id            = module.dissco-k8s-vpc.private_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
+  destination_cidr_block    = "10.1.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
 
 resource "aws_route" "route_table_entry_kubernetes_public" {
   route_table_id            = module.dissco-k8s-vpc.public_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
+  destination_cidr_block    = "10.1.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
 
+
+# Handle / DB Peering
+resource "aws_route" "route_table_entry_database_subnet_to_handle" {
+  route_table_id            = module.dissco-database-vpc.database_route_table_ids[0]
+  destination_cidr_block    = "10.2.0.0/16"
+  vpc_peering_connection_id = data.terraform_remote_state.handle-vpc-state.outputs.handle_peering_id
+}
+
+# DOI / K8s Peering
+resource "aws_route" "route_table_entry_database_subnet_to_doi_pub" {
+  route_table_id            = module.dissco-k8s-vpc.public_route_table_ids[0]
+  destination_cidr_block    = "10.200.0.0/16"
+  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
+}
+
+resource "aws_route" "route_table_entry_database_subnet_to_doi_priv" {
+  route_table_id            = module.dissco-k8s-vpc.private_route_table_ids[0]
+  destination_cidr_block    = "10.200.0.0/16"
+  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
+}
 
 

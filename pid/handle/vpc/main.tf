@@ -106,11 +106,12 @@ data "terraform_remote_state" "vpc-state" {
 
   config = {
     bucket = "dissco-terraform-state-backend"
-    key    = "test/vpc/terraform.tfstate"
+    key    = "production/vpc/terraform.tfstate"
     region = "eu-west-2"
   }
 }
 
+# Connect Handle Server to its Database
 resource "aws_vpc_peering_connection" "handle_to_db_peering" {
   peer_vpc_id = module.handle-server-vpc.vpc_id
   vpc_id      = data.terraform_remote_state.vpc-state.outputs.db-vpc-id-test
@@ -124,26 +125,15 @@ resource "aws_vpc_peering_connection" "handle_to_db_peering" {
   }
 }
 
-resource "aws_route" "route_table_entry_handle_database" {
+# Add peering to route tables
+resource "aws_route" "route_table_entry_handle_public" {
   route_table_id            = module.handle-server-vpc.public_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
+  destination_cidr_block    = "10.1.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
 }
 
-resource "aws_route" "route_table_entry_handle_private_0" {
+resource "aws_route" "route_table_entry_handle_private" {
   route_table_id            = module.handle-server-vpc.private_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
-}
-
-resource "aws_route" "route_table_entry_handle_private_1" {
-  route_table_id            = module.handle-server-vpc.private_route_table_ids[1]
-  destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
-}
-
-resource "aws_route" "route_table_entry_handle_private_2" {
-  route_table_id            = module.handle-server-vpc.private_route_table_ids[2]
-  destination_cidr_block    = "10.101.0.0/16"
+  destination_cidr_block    = "10.1.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
 }

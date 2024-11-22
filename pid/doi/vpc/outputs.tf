@@ -10,7 +10,7 @@ output "doi_server_subnets" {
 
 output "doi_peering_id" {
   value       = aws_vpc_peering_connection.doi_k8s_peering.id
-  description = "Public subnet of the DOI Server"
+  description = "Peering connection between DOI and K8s vpc"
 }
 
 output "doi_database_security_group" {
