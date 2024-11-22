@@ -18,7 +18,7 @@ output "k8s-vpc-id" {
   description = "Vpc id of the k8s virtual network"
 }
 
-output "db-vpc-id-prod" {
+output "db-vpc-id" {
   value       = module.dissco-database-vpc.vpc_id
   description = "Vpc id of the database"
 }

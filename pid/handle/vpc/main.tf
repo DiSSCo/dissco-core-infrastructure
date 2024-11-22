@@ -114,7 +114,7 @@ data "terraform_remote_state" "vpc-state" {
 # Connect Handle Server to its Database
 resource "aws_vpc_peering_connection" "handle_to_db_peering" {
   peer_vpc_id = module.handle-server-vpc.vpc_id
-  vpc_id      = data.terraform_remote_state.vpc-state.outputs.db-vpc-id-test
+  vpc_id      = data.terraform_remote_state.vpc-state.outputs.db-vpc-id
   auto_accept = true
   requester {
     allow_remote_vpc_dns_resolution = true

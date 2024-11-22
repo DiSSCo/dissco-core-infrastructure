@@ -36,7 +36,7 @@ resource "aws_docdb_cluster_instance" "cluster_instances" {
   count              = 1
   identifier         = "document-db-test-instance-1"
   cluster_identifier = aws_docdb_cluster.docdb.id
-  instance_class     = "db.t3.medium"
+  instance_class     = "db.r6g.xlarge"
 }
 
 resource "aws_docdb_cluster_parameter_group" "service" {
