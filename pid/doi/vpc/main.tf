@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-2"
+  region = "eu-north-1"
   default_tags {
     tags = {
       Environment = "DOI"
@@ -14,7 +14,7 @@ module "doi-vpc" {
   source = "terraform-aws-modules/vpc/aws"
   name                                   = "doi-vpc"
   cidr                                   = "10.200.0.0/16"
-  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
   private_subnets = ["10.200.1.0/24", "10.200.2.0/24", "10.200.3.0/24"]
   public_subnets = ["10.200.101.0/24", "10.200.102.0/24", "10.200.103.0/24"]
   database_subnets = ["10.200.201.0/24", "10.200.202.0/24", "10.200.203.0/24"]
@@ -96,7 +96,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "production/vpc/terraform.tfstate"
-    region = "eu-west-2"
+    region = "eu-north-1"
   }
 }
 
