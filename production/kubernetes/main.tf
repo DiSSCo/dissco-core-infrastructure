@@ -40,7 +40,7 @@ module "eks" {
 
   # EKS MANAGED NODE GROUPS
   eks_managed_node_groups = {
-    managed_m5 = {
+    managed_node = {
       node_group_name = "managed-ondemand"
       instance_types  = ["m7g.large"]
       subnet_ids      = data.terraform_remote_state.vpc-state.outputs.k8s-private-subnets
