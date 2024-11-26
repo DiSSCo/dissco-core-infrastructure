@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-2"
+  region = "eu-north-1"
   default_tags {
     tags = {
       Environment = "Handle"
@@ -15,7 +15,7 @@ module "handle-server-vpc" {
 
   name                = "handle-vpc"
   cidr                = "10.2.0.0/16"
-  azs                 = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  azs                 = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
   private_subnets     = ["10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
   public_subnets      = ["10.2.101.0/24", "10.2.102.0/24", "10.2.103.0/24"]
 
@@ -106,14 +106,15 @@ data "terraform_remote_state" "vpc-state" {
 
   config = {
     bucket = "dissco-terraform-state-backend"
-    key    = "test/vpc/terraform.tfstate"
-    region = "eu-west-2"
+    key    = "production/vpc/terraform.tfstate"
+    region = "eu-north-1"
   }
 }
 
-resource "aws_vpc_peering_connection" "handle_to_db_peering" {
+# Connect Handle Server to the K8s VPC
+resource "aws_vpc_peering_connection" "handle_to_k8s_peering" {
   peer_vpc_id = module.handle-server-vpc.vpc_id
-  vpc_id      = data.terraform_remote_state.vpc-state.outputs.db-vpc-id-test
+  vpc_id      = data.terraform_remote_state.vpc-state.outputs.k8s-vpc-id
   auto_accept = true
   requester {
     allow_remote_vpc_dns_resolution = true
@@ -124,26 +125,15 @@ resource "aws_vpc_peering_connection" "handle_to_db_peering" {
   }
 }
 
-resource "aws_route" "route_table_entry_handle_database" {
+# Add peering to route tables
+resource "aws_route" "route_table_entry_handle_public" {
   route_table_id            = module.handle-server-vpc.public_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_k8s_peering.id
 }
 
-resource "aws_route" "route_table_entry_handle_private_0" {
+resource "aws_route" "route_table_entry_handle_private" {
   route_table_id            = module.handle-server-vpc.private_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
-}
-
-resource "aws_route" "route_table_entry_handle_private_1" {
-  route_table_id            = module.handle-server-vpc.private_route_table_ids[1]
-  destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
-}
-
-resource "aws_route" "route_table_entry_handle_private_2" {
-  route_table_id            = module.handle-server-vpc.private_route_table_ids[2]
-  destination_cidr_block    = "10.101.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_k8s_peering.id
 }

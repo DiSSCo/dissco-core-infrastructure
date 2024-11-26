@@ -1,8 +1,3 @@
-output "database_subnet_group" {
-  value       = module.dissco-database-vpc.database_subnet_group
-  description = "Subnet of the database"
-}
-
 output "database_security_group" {
   value       = aws_security_group.dissco-database-sg.id
   description = "Security group of the database"
@@ -18,7 +13,7 @@ output "k8s-vpc-id" {
   description = "Vpc id of the k8s virtual network"
 }
 
-output "db-vpc-id-test" {
+output "db-vpc-id" {
   value       = module.dissco-database-vpc.vpc_id
   description = "Vpc id of the database"
 }

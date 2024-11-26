@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-2"
+  region = "eu-north-1"
   default_tags {
     tags = {
       Environment = "DOI"
@@ -22,7 +22,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "doi-terraform-state-backend"
     key    = "doi/vpc/terraform.tfstate"
-    region = "eu-west-2"
+    region = "eu-north-1"
   }
 }
 
@@ -37,6 +37,6 @@ resource "aws_instance" "doi_server" {
   associate_public_ip_address = true
   key_name = aws_key_pair.key_pair.key_name
 
-  subnet_id = data.terraform_remote_state.vpc-state.outputs.doi_server_subnets[0]
-  vpc_security_group_ids = [data.terraform_remote_state.vpc-state.outputs.doi_server_security_group]
+  subnet_id = data.terraform_remote_state.vpc-state.outputs.doi_server_public_subnets[0]
+  vpc_security_group_ids = [data.terraform_remote_state.vpc-state.outputs.doi_security_group]
 }

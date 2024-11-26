@@ -1,10 +1,10 @@
 provider "aws" {
-  region = "eu-west-2"
+  region = "eu-north-1"
   default_tags {
     tags = {
       Environment = "DOI"
       Owner       = "DiSSCo"
-      Project     = "DiSRSCo DOI"
+      Project     = "DiSSCo DOI"
       Terraform   = "True"
     }
   }
@@ -14,7 +14,7 @@ module "doi-vpc" {
   source = "terraform-aws-modules/vpc/aws"
   name                                   = "doi-vpc"
   cidr                                   = "10.200.0.0/16"
-  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
   private_subnets = ["10.200.1.0/24", "10.200.2.0/24", "10.200.3.0/24"]
   public_subnets = ["10.200.101.0/24", "10.200.102.0/24", "10.200.103.0/24"]
   database_subnets = ["10.200.201.0/24", "10.200.202.0/24", "10.200.203.0/24"]
@@ -27,44 +27,9 @@ module "doi-vpc" {
   enable_dns_support   = true
 }
 
-resource "aws_security_group" "doi-database-sg" {
+resource "aws_security_group" "doi-vpc-sg" {
   name        = "doi-database-sg"
   description = "DOI database security group"
-  vpc_id      = module.doi-vpc.vpc_id
-
-  # ingress
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access from within VPC"
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access for Naturalis eduroam"
-    cidr_blocks = ["145.136.247.119/32"]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access for Naturalis Network"
-    cidr_blocks = ["145.136.247.125/32"]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access from within VPC"
-    cidr_blocks = [module.doi-vpc.vpc_cidr_block]
-  }
-}
-
-resource "aws_security_group" "doi-server-sg" {
-  name        = "doi-server-sg"
-  description = "DOI server security group"
   vpc_id      = module.doi-vpc.vpc_id
 
   # ingress
@@ -130,14 +95,14 @@ data "terraform_remote_state" "vpc-state" {
 
   config = {
     bucket = "dissco-terraform-state-backend"
-    key    = "test/vpc/terraform.tfstate"
-    region = "eu-west-2"
+    key    = "production/vpc/terraform.tfstate"
+    region = "eu-north-1"
   }
 }
 
 resource "aws_vpc_peering_connection" "doi_k8s_peering" {
   peer_vpc_id = module.doi-vpc.vpc_id
-  vpc_id      = data.terraform_remote_state.vpc-state.outputs.vpc_id
+  vpc_id      = data.terraform_remote_state.vpc-state.outputs.k8s-vpc-id
   auto_accept = true
   requester {
     allow_remote_vpc_dns_resolution = true
@@ -150,12 +115,12 @@ resource "aws_vpc_peering_connection" "doi_k8s_peering" {
 
 resource "aws_route" "route_table_entry_kubernetes_public" {
   route_table_id            = module.doi-vpc.public_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
+  destination_cidr_block    = "10.0.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
 }
 
 resource "aws_route" "route_table_entry_kubernetes_database" {
   route_table_id            = module.doi-vpc.database_route_table_ids[0]
-  destination_cidr_block    = "10.101.0.0/16"
+  destination_cidr_block    = "10.0.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
 }
