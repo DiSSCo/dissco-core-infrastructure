@@ -25,7 +25,7 @@ resource "aws_docdb_cluster" "docdb" {
   engine                          = "docdb"
   master_username                 = "disscomasteruser"
   master_password                 = ""
-  backup_retention_period         = 7
+  backup_retention_period         = 14
   db_subnet_group_name            = data.terraform_remote_state.vpc-state.outputs.handle_database_subnet_group
   vpc_security_group_ids          = [data.terraform_remote_state.vpc-state.outputs.handle_security_group]
   skip_final_snapshot             = true
@@ -36,7 +36,7 @@ resource "aws_docdb_cluster_instance" "cluster_instances" {
   count              = 1
   identifier         = "document-db-handle-instance-1"
   cluster_identifier = aws_docdb_cluster.docdb.id
-  instance_class     = "db.r6g.xlarge"
+  instance_class     = "db.r7g.xlarge"
 }
 
 resource "aws_docdb_cluster_parameter_group" "service" {

@@ -1,6 +1,6 @@
 provider "aws" {
-  region = "us-east-1"
-  alias  = "virginia"
+  region = "eu-north-1"
+  alias  = "stockholm"
 }
 
 provider "kubernetes" {

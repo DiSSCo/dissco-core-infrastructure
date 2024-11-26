@@ -10,7 +10,7 @@ output "handle_server_security_group" {
 
 output "handle_peering_id" {
   value       = aws_vpc_peering_connection.handle_to_k8s_peering.id
-  description = "Peering connection between handle server and its db"
+  description = "Peering connection between handle server and the K8s cluster"
 }
 
 output "handle_cidr_block" {

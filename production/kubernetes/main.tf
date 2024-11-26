@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-2"
+  region = "eu-north-1"
   default_tags {
     tags = {
       Environment = "Production"
@@ -16,7 +16,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "production/vpc/terraform.tfstate"
-    region = "eu-west-2"
+    region = "eu-north-1"
   }
 }
 
@@ -42,7 +42,7 @@ module "eks" {
   eks_managed_node_groups = {
     managed_m5 = {
       node_group_name = "managed-ondemand"
-      instance_types  = ["m5.large"]
+      instance_types  = ["m7g.large"]
       subnet_ids      = data.terraform_remote_state.vpc-state.outputs.k8s-private-subnets
       capacity_type   = "ON_DEMAND"
       desired_size    = 2
@@ -196,7 +196,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
       {
         "Effect" : "Allow",
         "Action" : "eks:DescribeCluster",
-        "Resource" : "arn:aws:eks:eu-west-2:824841205322:cluster/dissco-k8s-production",
+        "Resource" : "arn:aws:eks:eu-north-1:824841205322:cluster/dissco-k8s-production",
         "Sid" : "EKSClusterEndpointLookup"
       },
       {
@@ -209,7 +209,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         "Condition" : {
           "StringEquals" : {
             "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:RequestTag/topology.kubernetes.io/region" : "eu-west-2"
+            "aws:RequestTag/topology.kubernetes.io/region" : "eu-north-1"
           },
           "StringLike" : {
             "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass" : "*"
@@ -226,9 +226,9 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         "Condition" : {
           "StringEquals" : {
             "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-west-2",
+            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-north-1",
             "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:RequestTag/topology.kubernetes.io/region" : "eu-west-2"
+            "aws:RequestTag/topology.kubernetes.io/region" : "eu-north-1"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass" : "*",
@@ -248,7 +248,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         "Condition" : {
           "StringEquals" : {
             "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-west-2"
+            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-north-1"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass" : "*"

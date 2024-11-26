@@ -128,12 +128,12 @@ resource "aws_vpc_peering_connection" "handle_to_k8s_peering" {
 # Add peering to route tables
 resource "aws_route" "route_table_entry_handle_public" {
   route_table_id            = module.handle-server-vpc.public_route_table_ids[0]
-  destination_cidr_block    = "10.1.0.0/16"
+  destination_cidr_block    = "10.0.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_k8s_peering.id
 }
 
 resource "aws_route" "route_table_entry_handle_private" {
   route_table_id            = module.handle-server-vpc.private_route_table_ids[0]
-  destination_cidr_block    = "10.1.0.0/16"
+  destination_cidr_block    = "10.0.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_k8s_peering.id
 }

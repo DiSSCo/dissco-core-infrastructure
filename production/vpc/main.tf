@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-2"
+  region = "eu-north-1"
   default_tags {
     tags = {
       Environment = "Production"
@@ -21,7 +21,7 @@ module "dissco-k8s-vpc" {
   name = "dissco-k8s-vpc-production"
   cidr = "10.0.0.0/16"
 
-  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
   public_subnets = ["10.0.0.0/19", "10.0.32.0/19", "10.0.64.0/19"]
   private_subnets = ["10.0.96.0/19", "10.0.128.0/19", "10.0.160.0/19"]
 
@@ -53,7 +53,7 @@ module "dissco-database-vpc" {
 
   name                                   = "dissco-database-vpc-production"
   cidr                                   = "10.1.0.0/16"
-  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
   private_subnets = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
   public_subnets = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
   database_subnets = ["10.1.201.0/24", "10.1.202.0/24", "10.1.203.0/24"]
@@ -72,7 +72,7 @@ data "terraform_remote_state" "handle-vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "handle/vpc/terraform.tfstate"
-    region = "eu-west-2"
+    region = "eu-north-1"
   }
 }
 
@@ -82,7 +82,7 @@ data "terraform_remote_state" "doi-vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "doi/vpc/terraform.tfstate"
-    region = "eu-west-2"
+    region = "eu-north-1"
   }
 }
 
@@ -105,13 +105,6 @@ resource "aws_security_group" "dissco-database-sg" {
     protocol    = "tcp"
     description = "PostgreSQL access for Tom Office"
     cidr_blocks = ["81.172.128.113/32"]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access for Sou Home"
-    cidr_blocks = ["94.213.247.69/32"]
   }
   ingress {
     from_port   = 5432
@@ -145,20 +138,6 @@ resource "aws_security_group" "dissco-database-sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    description = "Handle Server"
-    cidr_blocks = ["18.130.232.162/32"]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access for Naturalis Network"
-    cidr_blocks = ["145.136.247.125/32"]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
     description = "PostgreSQL access for Sou Home"
     cidr_blocks = ["94.213.247.69/32"]
   }
@@ -168,13 +147,6 @@ resource "aws_security_group" "dissco-database-sg" {
     protocol    = "tcp"
     description = "MongoDB access from within VPC"
     cidr_blocks = [module.dissco-database-vpc.vpc_cidr_block, module.dissco-k8s-vpc.vpc_cidr_block]
-  }
-  ingress {
-    from_port   = 27017
-    to_port     = 27017
-    protocol    = "tcp"
-    description = "MongoDB access for Handle Server"
-    cidr_blocks = [data.terraform_remote_state.handle-vpc-state.outputs.handle_cidr_block]
   }
 }
 

@@ -4,7 +4,7 @@ provider "aws" {
     tags = {
       Environment = "DOI"
       Owner       = "DiSSCo"
-      Project     = "DiSRSCo DOI"
+      Project     = "DiSSCo DOI"
       Terraform   = "True"
     }
   }
