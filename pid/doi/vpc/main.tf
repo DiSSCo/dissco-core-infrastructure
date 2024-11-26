@@ -102,7 +102,7 @@ data "terraform_remote_state" "vpc-state" {
 
 resource "aws_vpc_peering_connection" "doi_k8s_peering" {
   peer_vpc_id = module.doi-vpc.vpc_id
-  vpc_id      = data.terraform_remote_state.vpc-state.outputs.vpc_id-prod
+  vpc_id      = data.terraform_remote_state.vpc-state.outputs.k8s-vpc-id
   auto_accept = true
   requester {
     allow_remote_vpc_dns_resolution = true

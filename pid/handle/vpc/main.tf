@@ -111,10 +111,10 @@ data "terraform_remote_state" "vpc-state" {
   }
 }
 
-# Connect Handle Server to its Database
-resource "aws_vpc_peering_connection" "handle_to_db_peering" {
+# Connect Handle Server to the K8s VPC
+resource "aws_vpc_peering_connection" "handle_to_k8s_peering" {
   peer_vpc_id = module.handle-server-vpc.vpc_id
-  vpc_id      = data.terraform_remote_state.vpc-state.outputs.db-vpc-id
+  vpc_id      = data.terraform_remote_state.vpc-state.outputs.k8s-vpc-id
   auto_accept = true
   requester {
     allow_remote_vpc_dns_resolution = true
@@ -129,11 +129,11 @@ resource "aws_vpc_peering_connection" "handle_to_db_peering" {
 resource "aws_route" "route_table_entry_handle_public" {
   route_table_id            = module.handle-server-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.1.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_k8s_peering.id
 }
 
 resource "aws_route" "route_table_entry_handle_private" {
   route_table_id            = module.handle-server-vpc.private_route_table_ids[0]
   destination_cidr_block    = "10.1.0.0/16"
-  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_db_peering.id
+  vpc_peering_connection_id = aws_vpc_peering_connection.handle_to_k8s_peering.id
 }

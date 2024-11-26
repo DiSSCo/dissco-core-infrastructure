@@ -1,8 +1,3 @@
-output "database_subnet_group" {
-  value       = module.dissco-database-vpc.database_subnet_group
-  description = "Subnet of the database"
-}
-
 output "database_security_group" {
   value       = aws_security_group.dissco-database-sg.id
   description = "Security group of the database"
