@@ -215,13 +215,13 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
 # Handle / K8s Peering
 resource "aws_route" "route_table_entry_database_subnet_to_handle_pub" {
   route_table_id            = module.dissco-database-vpc.public_route_table_ids[0]
-  destination_cidr_block    = "10.200.0.0/16"
+  destination_cidr_block    = "10.2.0.0/16"
   vpc_peering_connection_id = data.terraform_remote_state.handle-vpc-state.outputs.handle_peering_id
 }
 
 resource "aws_route" "route_table_entry_database_subnet_to_handle_priv" {
   route_table_id            = module.dissco-database-vpc.private_route_table_ids[0]
-  destination_cidr_block    = "10.200.0.0/16"
+  destination_cidr_block    = "10.2.0.0/16"
   vpc_peering_connection_id = data.terraform_remote_state.handle-vpc-state.outputs.handle_peering_id
 }
 
