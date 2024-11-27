@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "Production"
@@ -16,7 +16,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "production/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
   }
 }
 
@@ -40,9 +40,9 @@ module "eks" {
 
   # EKS MANAGED NODE GROUPS
   eks_managed_node_groups = {
-    managed_node = {
+    managed_nodes = {
       node_group_name = "managed-ondemand"
-      instance_types  = ["m7g.large"]
+      instance_types  = ["m7i.large"]
       subnet_ids      = data.terraform_remote_state.vpc-state.outputs.k8s-private-subnets
       capacity_type   = "ON_DEMAND"
       desired_size    = 2
@@ -85,7 +85,7 @@ module "iam_assumable_role_admin" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.48.0"
   create_role                   = true
-  role_name                     = "secret-manager"
+  role_name                     = "secret-manager-prod"
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
   role_policy_arns              = [aws_iam_policy.eks-secret-manager.arn]
   oidc_fully_qualified_subjects = [
@@ -101,7 +101,7 @@ module "iam_assumable_role_admin" {
 }
 
 resource "aws_iam_policy" "eks-secret-manager" {
-  name_prefix = "eks-secret-manager"
+  name_prefix = "eks-secret-manager-prod"
   description = "EKS secret-manager policy for cluster ${module.eks.cluster_name}"
   policy      = data.aws_iam_policy_document.secret-manager.json
 }
@@ -151,65 +151,193 @@ module "iam_assumable_role_karpenter_controller" {
 resource "aws_iam_policy" "karpenter-controller-policy" {
   name_prefix = "KarpenterControllerPolicy-dissco-k8s-production"
   description = "EKS secret-manager policy for cluster ${module.eks.cluster_name}"
-  policy      = jsonencode({
+  policy = jsonencode({
+    "Version" : "2012-10-17",
     "Statement" : [
       {
-        "Action" : [
-          "ssm:GetParameter",
-          "ec2:DescribeImages",
-          "ec2:RunInstances",
-          "ec2:DescribeSubnets",
-          "ec2:DescribeSecurityGroups",
-          "ec2:DescribeLaunchTemplates",
-          "ec2:DescribeInstances",
-          "ec2:DescribeInstanceTypes",
-          "ec2:DescribeInstanceTypeOfferings",
-          "ec2:DescribeAvailabilityZones",
-          "ec2:DeleteLaunchTemplate",
-          "ec2:CreateTags",
-          "ec2:CreateLaunchTemplate",
-          "ec2:CreateFleet",
-          "ec2:DescribeSpotPriceHistory",
-          "pricing:GetProducts"
+        "Sid" : "AllowScopedEC2InstanceAccessActions",
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:ec2:eu-west-2::image/*",
+          "arn:aws:ec2:eu-west-2::snapshot/*",
+          "arn:aws:ec2:eu-west-2:*:security-group/*",
+          "arn:aws:ec2:eu-west-2:*:subnet/*"
         ],
-        "Effect" : "Allow",
-        "Resource" : "*",
-        "Sid" : "Karpenter"
+        "Action" : [
+          "ec2:RunInstances",
+          "ec2:CreateFleet"
+        ]
       },
       {
-        "Action" : "ec2:TerminateInstances",
+        "Sid" : "AllowScopedEC2LaunchTemplateAccessActions",
+        "Effect" : "Allow",
+        "Resource" : "arn:aws:ec2:eu-west-2:*:launch-template/*",
+        "Action" : [
+          "ec2:RunInstances",
+          "ec2:CreateFleet"
+        ],
         "Condition" : {
+          "StringEquals" : {
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned"
+          },
           "StringLike" : {
-            "ec2:ResourceTag/karpenter.sh/nodepool" : "*"
+            "aws:ResourceTag/karpenter.sh/nodepool" : "*"
           }
-        },
+        }
+      },
+      {
+        "Sid" : "AllowScopedEC2InstanceActionsWithTags",
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:ec2:eu-west-2:*:fleet/*",
+          "arn:aws:ec2:eu-west-2:*:instance/*",
+          "arn:aws:ec2:eu-west-2:*:volume/*",
+          "arn:aws:ec2:eu-west-2:*:network-interface/*",
+          "arn:aws:ec2:eu-west-2:*:launch-template/*",
+          "arn:aws:ec2:eu-west-2:*:spot-instances-request/*"
+        ],
+        "Action" : [
+          "ec2:RunInstances",
+          "ec2:CreateFleet",
+          "ec2:CreateLaunchTemplate"
+        ],
+        "Condition" : {
+          "StringEquals" : {
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc"
+          },
+          "StringLike" : {
+            "aws:RequestTag/karpenter.sh/nodepool" : "*"
+          }
+        }
+      },
+      {
+        "Sid" : "AllowScopedResourceCreationTagging",
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:ec2:eu-west-2:*:fleet/*",
+          "arn:aws:ec2:eu-west-2:*:instance/*",
+          "arn:aws:ec2:eu-west-2:*:volume/*",
+          "arn:aws:ec2:eu-west-2:*:network-interface/*",
+          "arn:aws:ec2:eu-west-2:*:launch-template/*",
+          "arn:aws:ec2:eu-west-2:*:spot-instances-request/*"
+        ],
+        "Action" : "ec2:CreateTags",
+        "Condition" : {
+          "StringEquals" : {
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc",
+            "ec2:CreateAction" : [
+              "RunInstances",
+              "CreateFleet",
+              "CreateLaunchTemplate"
+            ]
+          },
+          "StringLike" : {
+            "aws:RequestTag/karpenter.sh/nodepool" : "*"
+          }
+        }
+      },
+      {
+        "Sid" : "AllowScopedResourceTagging",
+        "Effect" : "Allow",
+        "Resource" : "arn:aws:ec2:eu-west-2:*:instance/*",
+        "Action" : "ec2:CreateTags",
+        "Condition" : {
+          "StringEquals" : {
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned"
+          },
+          "StringLike" : {
+            "aws:ResourceTag/karpenter.sh/nodepool" : "*"
+          },
+          "StringEqualsIfExists" : {
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc"
+          },
+          "ForAllValues:StringEquals" : {
+            "aws:TagKeys" : [
+              "eks:eks-cluster-name",
+              "karpenter.sh/nodeclaim",
+              "Name"
+            ]
+          }
+        }
+      },
+      {
+        "Sid" : "AllowScopedDeletion",
+        "Effect" : "Allow",
+        "Resource" : [
+          "arn:aws:ec2:eu-west-2:*:instance/*",
+          "arn:aws:ec2:eu-west-2:*:launch-template/*"
+        ],
+        "Action" : [
+          "ec2:TerminateInstances",
+          "ec2:DeleteLaunchTemplate"
+        ],
+        "Condition" : {
+          "StringEquals" : {
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned"
+          },
+          "StringLike" : {
+            "aws:ResourceTag/karpenter.sh/nodepool" : "*"
+          }
+        }
+      },
+      {
+        "Sid" : "AllowRegionalReadActions",
         "Effect" : "Allow",
         "Resource" : "*",
-        "Sid" : "ConditionalEC2Termination"
+        "Action" : [
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeImages",
+          "ec2:DescribeInstances",
+          "ec2:DescribeInstanceTypeOfferings",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeLaunchTemplates",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeSpotPriceHistory",
+          "ec2:DescribeSubnets"
+        ],
+        "Condition" : {
+          "StringEquals" : {
+            "aws:RequestedRegion" : "eu-west-2"
+          }
+        }
       },
       {
+        "Sid" : "AllowSSMReadActions",
         "Effect" : "Allow",
+        "Resource" : "arn:aws:ssm:eu-west-2::parameter/aws/service/*",
+        "Action" : "ssm:GetParameter"
+      },
+      {
+        "Sid" : "AllowPricingReadActions",
+        "Effect" : "Allow",
+        "Resource" : "*",
+        "Action" : "pricing:GetProducts"
+      },
+      {
+        "Sid" : "AllowPassingInstanceRole",
+        "Effect" : "Allow",
+        "Resource" : "arn:aws:iam::824841205322:role/KarpenterNodeRole-dissco-k8s-acc",
         "Action" : "iam:PassRole",
-        "Resource" : "arn:aws:iam::824841205322:role/KarpenterNodeRole-dissco-k8s-production",
-        "Sid" : "PassNodeIAMRole"
-      },
-      {
-        "Effect" : "Allow",
-        "Action" : "eks:DescribeCluster",
-        "Resource" : "arn:aws:eks:eu-north-1:824841205322:cluster/dissco-k8s-production",
-        "Sid" : "EKSClusterEndpointLookup"
+        "Condition" : {
+          "StringEquals" : {
+            "iam:PassedToService" : "ec2.amazonaws.com"
+          }
+        }
       },
       {
         "Sid" : "AllowScopedInstanceProfileCreationActions",
         "Effect" : "Allow",
-        "Resource" : "*",
+        "Resource" : "arn:aws:iam::824841205322:instance-profile/*",
         "Action" : [
           "iam:CreateInstanceProfile"
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:RequestTag/topology.kubernetes.io/region" : "eu-north-1"
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc",
+            "aws:RequestTag/topology.kubernetes.io/region" : "eu-west-2"
           },
           "StringLike" : {
             "aws:RequestTag/karpenter.k8s.aws/ec2nodeclass" : "*"
@@ -219,16 +347,17 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
       {
         "Sid" : "AllowScopedInstanceProfileTagActions",
         "Effect" : "Allow",
-        "Resource" : "*",
+        "Resource" : "arn:aws:iam::824841205322:instance-profile/*",
         "Action" : [
           "iam:TagInstanceProfile"
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-north-1",
-            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:RequestTag/topology.kubernetes.io/region" : "eu-north-1"
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-west-2",
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc",
+            "aws:RequestTag/topology.kubernetes.io/region" : "eu-west-2"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass" : "*",
@@ -239,7 +368,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
       {
         "Sid" : "AllowScopedInstanceProfileActions",
         "Effect" : "Allow",
-        "Resource" : "*",
+        "Resource" : "arn:aws:iam::824841205322:instance-profile/*",
         "Action" : [
           "iam:AddRoleToInstanceProfile",
           "iam:RemoveRoleFromInstanceProfile",
@@ -247,8 +376,8 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
-            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-north-1"
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:ResourceTag/topology.kubernetes.io/region" : "eu-west-2"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.k8s.aws/ec2nodeclass" : "*"
@@ -258,10 +387,15 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
       {
         "Sid" : "AllowInstanceProfileReadActions",
         "Effect" : "Allow",
-        "Resource" : "*",
+        "Resource" : "arn:aws:iam::824841205322:instance-profile/*",
         "Action" : "iam:GetInstanceProfile"
+      },
+      {
+        "Sid" : "AllowAPIServerEndpointDiscovery",
+        "Effect" : "Allow",
+        "Resource" : "arn:aws:eks:eu-west-2:824841205322:cluster/dissco-k8s-acc",
+        "Action" : "eks:DescribeCluster"
       }
-    ],
-    "Version" : "2012-10-17"
+    ]
   })
 }

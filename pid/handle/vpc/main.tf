@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "Handle"
@@ -15,7 +15,7 @@ module "handle-server-vpc" {
 
   name                = "handle-vpc"
   cidr                = "10.2.0.0/16"
-  azs                 = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
+  azs                 = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   private_subnets     = ["10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
   public_subnets      = ["10.2.101.0/24", "10.2.102.0/24", "10.2.103.0/24"]
 
@@ -107,7 +107,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "production/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
   }
 }
 

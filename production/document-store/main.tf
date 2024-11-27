@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "Production"
@@ -16,7 +16,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "production/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
   }
 }
 
@@ -36,7 +36,7 @@ resource "aws_docdb_cluster_instance" "cluster_instances" {
   count              = 1
   identifier         = "document-db-production-instance-1"
   cluster_identifier = aws_docdb_cluster.docdb.id
-  instance_class     = "db.r7g.xlarge"
+  instance_class     = "db.r6g.xlarge"
 }
 
 resource "aws_docdb_cluster_parameter_group" "service" {
