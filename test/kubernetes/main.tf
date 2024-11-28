@@ -27,7 +27,7 @@ module "eks" {
   cluster_name                   = "dissco-k8s-test"
   cluster_version                = 1.29
   cluster_endpoint_public_access = true
-  authentication_mode            = "API_AND_CO  NFIG_MAP"
+  authentication_mode            = "API_AND_CONFIG_MAP"
   cloudwatch_log_group_retention_in_days = 0
 
   # EKS Cluster VPC and Subnet mandatory config
