@@ -12,7 +12,7 @@ provider "aws" {
 
 # S3 Bucket for Data Exporter
 resource "aws_iam_user" "export-bucket-agent" {
-  name = "export-bucket-agent"
+  name = "export-bucket-agent-production"
 }
 
 resource "aws_s3_bucket" "data-export-bucket" {
@@ -65,9 +65,6 @@ data "aws_iam_policy_document" "bucket-policy" {
     ]
   }
 }
-
-
-# S3 Buckets for COL Indexes
 
 resource "aws_s3_bucket" "col-indexes" {
   bucket = "col-indexes"
