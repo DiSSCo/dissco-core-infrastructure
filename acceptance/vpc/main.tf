@@ -16,7 +16,7 @@ resource "aws_eip" "k8s-eggress-ip" {
 
 module "dissco-k8s-vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "5.0.0"
+  version = "5.16.0"
 
   name = "dissco-k8s-vpc-acc"
   cidr = "10.50.0.0/16"
@@ -49,6 +49,7 @@ module "dissco-k8s-vpc" {
 
 module "dissco-database-vpc" {
   source = "terraform-aws-modules/vpc/aws"
+  version = "5.16.0"
 
   name                                   = "dissco-database-vpc-acc"
   cidr                                   = "10.51.0.0/16"
@@ -77,13 +78,6 @@ resource "aws_security_group" "dissco-database-sg" {
     protocol    = "tcp"
     description = "PostgreSQL access from within VPC"
     cidr_blocks = [module.dissco-database-vpc.vpc_cidr_block, module.dissco-k8s-vpc.vpc_cidr_block]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    description = "PostgreSQL access for Sam Home"
-    cidr_blocks = ["85.144.90.28/32"]
   }
   ingress {
     from_port   = 5432
