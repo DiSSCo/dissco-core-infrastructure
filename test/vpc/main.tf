@@ -70,7 +70,7 @@ data "terraform_remote_state" "handle-vpc-state" {
 
   config = {
     bucket = "dissco-terraform-state-backend"
-     key    = "handle/vpc/terraform.tfstate"
+    key    = "handle/vpc/terraform.tfstate"
     region = "eu-west-2"
   }
 }
