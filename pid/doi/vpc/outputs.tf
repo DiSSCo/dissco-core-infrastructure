@@ -19,6 +19,6 @@ output "doi_peering_id" {
 }
 
 output "doi_security_group" {
-  value       = aws_security_group.doi-vpc-sg.id
+  value       = aws_security_group.doi-server-sg.id
   description = "Security group of the DOI VPC"
 }
