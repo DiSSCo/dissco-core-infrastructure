@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "Production"
@@ -21,7 +21,7 @@ module "dissco-k8s-vpc" {
   name = "dissco-k8s-vpc-production"
   cidr = "10.0.0.0/16"
 
-  azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
+  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   public_subnets = ["10.0.0.0/19", "10.0.32.0/19", "10.0.64.0/19"]
   private_subnets = ["10.0.96.0/19", "10.0.128.0/19", "10.0.160.0/19"]
 
@@ -53,7 +53,7 @@ module "dissco-database-vpc" {
 
   name                                   = "dissco-database-vpc-production"
   cidr                                   = "10.1.0.0/16"
-  azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
+  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   private_subnets = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
   public_subnets = ["10.1.101.0/24", "10.1.102.0/24", "10.1.103.0/24"]
   database_subnets = ["10.1.201.0/24", "10.1.202.0/24", "10.1.203.0/24"]
@@ -64,26 +64,6 @@ module "dissco-database-vpc" {
 
   enable_dns_hostnames = true
   enable_dns_support   = true
-}
-
-data "terraform_remote_state" "handle-vpc-state" {
-  backend = "s3"
-
-  config = {
-    bucket = "dissco-terraform-state-backend"
-    key    = "handle/vpc/terraform.tfstate"
-    region = "eu-north-1"
-  }
-}
-
-data "terraform_remote_state" "doi-vpc-state" {
-  backend = "s3"
-
-  config = {
-    bucket = "dissco-terraform-state-backend"
-    key    = "doi/vpc/terraform.tfstate"
-    region = "eu-north-1"
-  }
 }
 
 resource "aws_security_group" "dissco-database-sg" {
@@ -148,6 +128,13 @@ resource "aws_security_group" "dissco-database-sg" {
     description = "MongoDB access from within VPC"
     cidr_blocks = [module.dissco-database-vpc.vpc_cidr_block, module.dissco-k8s-vpc.vpc_cidr_block]
   }
+  ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    description = "Mongodb access from the DOI VPC"
+    cidr_blocks = ["10.200.0.0/16"]
+  }
 }
 
 
@@ -183,8 +170,29 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
 
+data "terraform_remote_state" "handle-vpc-state" {
+  backend = "s3"
+
+  config = {
+    bucket = "dissco-terraform-state-backend"
+     key    = "handle/vpc/terraform.tfstate"
+    region = "eu-west-2"
+  }
+}
+
+data "terraform_remote_state" "doi-vpc-state" {
+  backend = "s3"
+
+  config = {
+    bucket = "dissco-terraform-state-backend"
+    key    = "doi/vpc/terraform.tfstate"
+    region = "eu-west-2"
+  }
+}
+
 
 # Handle / K8s Peering
+/*
 resource "aws_route" "route_table_entry_database_subnet_to_handle_pub" {
   route_table_id            = module.dissco-database-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.2.0.0/16"
@@ -195,7 +203,7 @@ resource "aws_route" "route_table_entry_database_subnet_to_handle_priv" {
   route_table_id            = module.dissco-database-vpc.private_route_table_ids[0]
   destination_cidr_block    = "10.2.0.0/16"
   vpc_peering_connection_id = data.terraform_remote_state.handle-vpc-state.outputs.handle_peering_id
-}
+}*/
 
 # DOI / K8s Peering
 resource "aws_route" "route_table_entry_database_subnet_to_doi_pub" {

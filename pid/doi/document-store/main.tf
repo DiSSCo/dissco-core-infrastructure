@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "DOI"
@@ -16,14 +16,14 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "doi/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
   }
 }
 
 resource "aws_docdb_cluster" "docdb" {
   cluster_identifier              = "dissco-document-db-doi"
   engine                          = "docdb"
-  master_username                 = "disscomasteruser"
+  master_username                 = "doimasteruser"
   master_password                 = ""
   backup_retention_period         = 35
   db_subnet_group_name            = data.terraform_remote_state.vpc-state.outputs.doi_database_subnet_group
@@ -36,7 +36,7 @@ resource "aws_docdb_cluster_instance" "cluster_instances" {
   count              = 1
   identifier         = "document-db-doi-instance-1"
   cluster_identifier = aws_docdb_cluster.docdb.id
-  instance_class     = "db.r7g.xlarge"
+  instance_class     = "db.r6g.xlarge"
 }
 
 resource "aws_docdb_cluster_parameter_group" "service" {

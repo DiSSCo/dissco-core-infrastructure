@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "DOI"
@@ -20,9 +20,9 @@ data "terraform_remote_state" "vpc-state" {
   backend = "s3"
 
   config = {
-    bucket = "doi-terraform-state-backend"
+    bucket = "dissco-terraform-state-backend"
     key    = "doi/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
   }
 }
 

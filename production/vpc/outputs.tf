@@ -3,6 +3,11 @@ output "database_security_group" {
   description = "Security group of the database"
 }
 
+output "database_subnet_group" {
+  value       = module.dissco-database-vpc.database_subnet_group
+  description = "Subnet of the database"
+}
+
 output "k8s-private-subnets" {
   value       = module.dissco-k8s-vpc.private_subnets
   description = "Private subnet of the k8s vpc"

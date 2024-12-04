@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "Production"
@@ -16,7 +16,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "production/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
   }
 }
 
@@ -27,7 +27,7 @@ resource "aws_db_instance" "default" {
   engine                      = "postgres"
   engine_version              = "17.2"
   allow_major_version_upgrade = true
-  instance_class              = "db.m7g.large"
+  instance_class              = "db.m7i.large"
   publicly_accessible         = true
   db_subnet_group_name        = data.terraform_remote_state.vpc-state.outputs.database_subnet_group
   vpc_security_group_ids      = [data.terraform_remote_state.vpc-state.outputs.database_security_group]

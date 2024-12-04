@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-north-1"
+  region = "eu-west-2"
   default_tags {
     tags = {
       Environment = "DOI"
@@ -11,10 +11,10 @@ provider "aws" {
 }
 
 module "doi-vpc" {
-  source = "terraform-aws-modules/vpc/aws"
+  source                                 = "terraform-aws-modules/vpc/aws"
   name                                   = "doi-vpc"
   cidr                                   = "10.200.0.0/16"
-  azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
+  azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
   private_subnets = ["10.200.1.0/24", "10.200.2.0/24", "10.200.3.0/24"]
   public_subnets = ["10.200.101.0/24", "10.200.102.0/24", "10.200.103.0/24"]
   database_subnets = ["10.200.201.0/24", "10.200.202.0/24", "10.200.203.0/24"]
@@ -27,9 +27,9 @@ module "doi-vpc" {
   enable_dns_support   = true
 }
 
-resource "aws_security_group" "doi-vpc-sg" {
-  name        = "doi-database-sg"
-  description = "DOI database security group"
+resource "aws_security_group" "doi-server-sg" {
+  name        = "doi-server-sg"
+  description = "DOI server security group"
   vpc_id      = module.doi-vpc.vpc_id
 
   # ingress
@@ -40,6 +40,14 @@ resource "aws_security_group" "doi-vpc-sg" {
     description = "SSH access for Naturalis Eduroam"
     cidr_blocks = ["145.136.247.119/32"]
   }
+  ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    description = "Mongodb access from K8s"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
   ingress {
     from_port   = 0
     to_port     = 22
@@ -88,6 +96,96 @@ resource "aws_security_group" "doi-vpc-sg" {
     protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    description = "MongoDB access from within VPC"
+    cidr_blocks = [module.doi-vpc.vpc_cidr_block]
+  }
+}
+
+
+resource "aws_security_group" "doi-database-sg" {
+  name        = "doi-database-sg"
+  description = "DOI database security group"
+
+  ingress {
+    cidr_blocks = [
+      "10.200.0.0/16",
+    ]
+    description = "PostgreSQL access from within VPC"
+    from_port   = 5432
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    protocol    = "tcp"
+    security_groups = []
+    self        = false
+    to_port     = 5432
+  }
+  ingress {
+    cidr_blocks = [
+      "145.136.247.119/32",
+    ]
+    description = "PostgreSQL access for Naturalis eduroam"
+    from_port   = 5432
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    protocol    = "tcp"
+    security_groups = []
+    self        = false
+    to_port     = 5432
+  }
+  ingress {
+    cidr_blocks = [
+      "145.136.247.125/32",
+    ]
+    description = "PostgreSQL access for Naturalis Network"
+    from_port   = 5432
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    protocol    = "tcp"
+    security_groups = []
+    self        = false
+    to_port     = 5432
+  }
+  ingress {
+    cidr_blocks = [
+      "93.102.85.38/32",
+    ]
+    description = "Sou Temp"
+    from_port   = 5432
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    protocol    = "tcp"
+    security_groups = []
+    self        = false
+    to_port     = 5432
+  }
+  ingress {
+    cidr_blocks = [
+      "94.213.247.69/32",
+    ]
+    description = "Sou Home"
+    from_port   = 5432
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    protocol    = "tcp"
+    security_groups = []
+    self        = false
+    to_port     = 5432
+  }
+  ingress {
+    cidr_blocks = []
+    description = "Sou Temp"
+    from_port   = 5432
+    ipv6_cidr_blocks = []
+    prefix_list_ids = []
+    protocol    = "tcp"
+    security_groups = []
+    self        = false
+    to_port     = 5432
+  }
 }
 
 data "terraform_remote_state" "vpc-state" {
@@ -96,7 +194,7 @@ data "terraform_remote_state" "vpc-state" {
   config = {
     bucket = "dissco-terraform-state-backend"
     key    = "production/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
   }
 }
 
@@ -121,6 +219,24 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
 
 resource "aws_route" "route_table_entry_kubernetes_database" {
   route_table_id            = module.doi-vpc.database_route_table_ids[0]
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
+}
+
+resource "aws_route" "route_table_entry_kubernetes_private" {
+  route_table_id            = module.doi-vpc.private_route_table_ids[0]
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
+}
+
+resource "aws_route" "route_table_entry_kubernetes_private_b" {
+  route_table_id            = module.doi-vpc.private_route_table_ids[1]
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
+}
+
+resource "aws_route" "route_table_entry_kubernetes_private_c" {
+  route_table_id            = module.doi-vpc.private_route_table_ids[2]
   destination_cidr_block    = "10.0.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
 }

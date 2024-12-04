@@ -1,8 +1,8 @@
 terraform {
   backend "s3" {
-    bucket = "doi-terraform-state-backend"
+    bucket = "dissco-terraform-state-backend"
     key    = "doi/vpc/terraform.tfstate"
-    region = "eu-north-1"
+    region = "eu-west-2"
 
     dynamodb_table = "terraform_state"
     encrypt        = true
