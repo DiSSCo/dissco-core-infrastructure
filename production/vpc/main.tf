@@ -128,6 +128,13 @@ resource "aws_security_group" "dissco-database-sg" {
     description = "MongoDB access from within VPC"
     cidr_blocks = [module.dissco-database-vpc.vpc_cidr_block, module.dissco-k8s-vpc.vpc_cidr_block]
   }
+  ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    description = "Mongodb access from the DOI VPC"
+    cidr_blocks = ["10.200.0.0/16"]
+  }
 }
 
 
@@ -162,8 +169,6 @@ resource "aws_route" "route_table_entry_kubernetes_public" {
   destination_cidr_block    = "10.1.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.database_peering.id
 }
-
-
 
 data "terraform_remote_state" "handle-vpc-state" {
   backend = "s3"

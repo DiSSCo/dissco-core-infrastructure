@@ -44,8 +44,8 @@ resource "aws_security_group" "doi-server-sg" {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    description = "Mongodb access from EduVPN"
-    cidr_blocks = ["145.90.236.23/32"]
+    description = "Mongodb access from K8s"
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   ingress {
@@ -95,6 +95,13 @@ resource "aws_security_group" "doi-server-sg" {
     to_port   = 0
     protocol  = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    description = "MongoDB access from within VPC"
+    cidr_blocks = [module.doi-vpc.vpc_cidr_block]
   }
 }
 
@@ -218,6 +225,18 @@ resource "aws_route" "route_table_entry_kubernetes_database" {
 
 resource "aws_route" "route_table_entry_kubernetes_private" {
   route_table_id            = module.doi-vpc.private_route_table_ids[0]
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
+}
+
+resource "aws_route" "route_table_entry_kubernetes_private_b" {
+  route_table_id            = module.doi-vpc.private_route_table_ids[1]
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
+}
+
+resource "aws_route" "route_table_entry_kubernetes_private_c" {
+  route_table_id            = module.doi-vpc.private_route_table_ids[2]
   destination_cidr_block    = "10.0.0.0/16"
   vpc_peering_connection_id = aws_vpc_peering_connection.doi_k8s_peering.id
 }
