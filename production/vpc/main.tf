@@ -209,13 +209,13 @@ resource "aws_route" "route_table_entry_database_subnet_to_handle_priv" {
 resource "aws_route" "route_table_entry_database_subnet_to_doi_pub" {
   route_table_id            = module.dissco-k8s-vpc.public_route_table_ids[0]
   destination_cidr_block    = "10.200.0.0/16"
-  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
+  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.pid_peering_id
 }
 
 resource "aws_route" "route_table_entry_database_subnet_to_doi_priv" {
   route_table_id            = module.dissco-k8s-vpc.private_route_table_ids[0]
   destination_cidr_block    = "10.200.0.0/16"
-  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.doi_peering_id
+  vpc_peering_connection_id = data.terraform_remote_state.doi-vpc-state.outputs.pid_peering_id
 }
 
 
