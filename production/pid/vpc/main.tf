@@ -55,6 +55,15 @@ resource "aws_security_group" "doi-server-sg" {
     description = "SSH Access for Naturalis Network"
     cidr_blocks = ["145.136.247.125/32"]
   }
+
+  ingress {
+    from_port   = 0
+    to_port     = 22
+    protocol    = "tcp"
+    description = "SSH Access for EduVPN"
+    cidr_blocks = ["145.90.236.12/32"]
+  }
+
   ingress {
     from_port   = 2641
     to_port     = 2641
