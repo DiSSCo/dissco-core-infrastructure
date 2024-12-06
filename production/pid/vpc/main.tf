@@ -85,20 +85,7 @@ resource "aws_security_group" "doi-server-sg" {
     description = "HTTP Access to DOI Server"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    description = "HTTP Access to DOI API"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    description = "HTTPS Access to DOI API"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+
   egress {
     from_port = 0
     to_port   = 0
