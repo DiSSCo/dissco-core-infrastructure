@@ -85,7 +85,7 @@ module "iam_assumable_role_admin" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.48.0"
   create_role                   = true
-  role_name                     = "secret-manager-prod"
+  role_name                     = "secret-manager-production"
   provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
   role_policy_arns              = [aws_iam_policy.eks-secret-manager.arn]
   oidc_fully_qualified_subjects = [
@@ -101,7 +101,7 @@ module "iam_assumable_role_admin" {
 }
 
 resource "aws_iam_policy" "eks-secret-manager" {
-  name_prefix = "eks-secret-manager-prod"
+  name_prefix = "eks-secret-manager-production"
   description = "EKS secret-manager policy for cluster ${module.eks.cluster_name}"
   policy      = data.aws_iam_policy_document.secret-manager.json
 }
@@ -178,7 +178,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned"
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.sh/nodepool" : "*"
@@ -203,8 +203,8 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc"
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-production"
           },
           "StringLike" : {
             "aws:RequestTag/karpenter.sh/nodepool" : "*"
@@ -225,8 +225,8 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         "Action" : "ec2:CreateTags",
         "Condition" : {
           "StringEquals" : {
-            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc",
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-production",
             "ec2:CreateAction" : [
               "RunInstances",
               "CreateFleet",
@@ -245,13 +245,13 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         "Action" : "ec2:CreateTags",
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned"
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.sh/nodepool" : "*"
           },
           "StringEqualsIfExists" : {
-            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc"
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-production"
           },
           "ForAllValues:StringEquals" : {
             "aws:TagKeys" : [
@@ -275,7 +275,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned"
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned"
           },
           "StringLike" : {
             "aws:ResourceTag/karpenter.sh/nodepool" : "*"
@@ -318,7 +318,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
       {
         "Sid" : "AllowPassingInstanceRole",
         "Effect" : "Allow",
-        "Resource" : "arn:aws:iam::824841205322:role/KarpenterNodeRole-dissco-k8s-acc",
+        "Resource" : "arn:aws:iam::824841205322:role/KarpenterNodeRole-dissco-k8s-production",
         "Action" : "iam:PassRole",
         "Condition" : {
           "StringEquals" : {
@@ -335,8 +335,8 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc",
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-production",
             "aws:RequestTag/topology.kubernetes.io/region" : "eu-west-2"
           },
           "StringLike" : {
@@ -353,10 +353,10 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
             "aws:ResourceTag/topology.kubernetes.io/region" : "eu-west-2",
-            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
-            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-acc",
+            "aws:RequestTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
+            "aws:RequestTag/eks:eks-cluster-name" : "dissco-k8s-production",
             "aws:RequestTag/topology.kubernetes.io/region" : "eu-west-2"
           },
           "StringLike" : {
@@ -376,7 +376,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
         ],
         "Condition" : {
           "StringEquals" : {
-            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-acc" : "owned",
+            "aws:ResourceTag/kubernetes.io/cluster/dissco-k8s-production" : "owned",
             "aws:ResourceTag/topology.kubernetes.io/region" : "eu-west-2"
           },
           "StringLike" : {
@@ -393,7 +393,7 @@ resource "aws_iam_policy" "karpenter-controller-policy" {
       {
         "Sid" : "AllowAPIServerEndpointDiscovery",
         "Effect" : "Allow",
-        "Resource" : "arn:aws:eks:eu-west-2:824841205322:cluster/dissco-k8s-acc",
+        "Resource" : "arn:aws:eks:eu-west-2:824841205322:cluster/dissco-k8s-production",
         "Action" : "eks:DescribeCluster"
       }
     ]
